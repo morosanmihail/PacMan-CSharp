@@ -53,7 +53,7 @@
       <HintPath>..\..\packages\Accord.Math.3.3.0\lib\net45\Accord.Math.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Accord.Neuro">
+    <Reference Include="Accord.Neuro, Version=3.3.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Accord.Neuro.3.3.0\lib\net45\Accord.Neuro.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -98,6 +98,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
