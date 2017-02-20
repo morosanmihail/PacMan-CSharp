@@ -412,8 +412,8 @@ namespace PacmanAI
                     g.DrawLine(new Pen(_drawbrush, 5f),
                                new Point(this.m_CurrentPosition.CenterX, this.m_CurrentPosition.CenterY),
                                new Point(m_Parent.PathNode.CenterX, m_Parent.PathNode.CenterY));
-
-                    g.DrawImage(LucPac.m_GreenBlock, new Point(this.m_CurrentPosition.CenterX - 2, this.m_CurrentPosition.CenterY - 2));
+                    g.DrawEllipse(new Pen(_drawbrush, 6f), this.m_CurrentPosition.CenterX - 2, this.m_CurrentPosition.CenterY - 2, 4, 4);
+                    //g.DrawImage(LucPac.m_GreenBlock, new Point(this.m_CurrentPosition.CenterX - 2, this.m_CurrentPosition.CenterY - 2));
                     g.DrawString(AverageScore.ToString(), new Font(FontFamily.GenericSansSerif, 10f), Brushes.White, m_CurrentPosition.CenterX, m_CurrentPosition.CenterY);
                     
                     // Output the last direction that was taken to get to the node that we are after.
@@ -568,18 +568,6 @@ namespace PacmanAI
         
 
         //private const bool DEBUG = true;
-        
-        #region Static Pens
-        // Static pen objects that are going to be used for drawing debug lines.
-        [NonSerialized()]
-        private static Pen RED_PEN = new Pen(Color.Red);
-        
-        [NonSerialized()]
-        private static Pen GREEN_PEN = new Pen(Color.Green);
-
-        [NonSerialized()]
-        private static Pen BLUE_PEN = new Pen(Color.Blue);
-        #endregion
 
         // Useful for the likes of MCTS and calling other states
         public static GameState m_GameState;
@@ -644,9 +632,6 @@ namespace PacmanAI
         //private Node m_Junction = null;
 
         //[field: NonSerializedAttribute()]
-        public static Image m_GreenBlock = null;
-        public static Image m_RedBlock = null;
-        public static Image m_BlueBlock = null;
 
         // The current path that the PacMan agent is focusing on at the moment.
         //private Node.PathInfo[] m_GeneratedPath;
@@ -658,12 +643,6 @@ namespace PacmanAI
             m_States = new Dictionary<FiniteState, State>();
 
             m_TestComplete = false;
-
-            #region Loading Images
-            m_GreenBlock = Image.FromFile("green_block.png");
-            m_RedBlock = Image.FromFile("red_block.png");
-            m_BlueBlock = Image.FromFile("blue_block.png");
-            #endregion
 
             //m_RoundDuration.Start();
 
@@ -721,8 +700,8 @@ namespace PacmanAI
             #endregion
 
             // Create the session ID that will be used for testing 
-            this.m_TestSessionID = GenerateSessionID();
-            this.m_TestStats.SessionID = m_TestSessionID;
+            //this.m_TestSessionID = GenerateSessionID();
+            //this.m_TestStats.SessionID = m_TestSessionID;
 
             // Create the directory that the data is going to be stored in 
             //m_TestDataFolder = Directory.CreateDirectory(Environment.CurrentDirectory + string.Format("/{0}", m_TestSessionID));
@@ -999,7 +978,7 @@ namespace PacmanAI
             
             //m_CurrentPossibleDirections = gs.Pacman.PossibleDirections();
             m_GameState = gs;
-                _returnDirection = m_States[m_CurrentState].Action.Invoke(null,null,gs);
+            _returnDirection = m_States[m_CurrentState].Action.Invoke(null,null,gs);
             //m_PreviousGameState = gs; // Used for comparing two different gamestates for thing
             //m_PreviousPossibleDirections = gs.Pacman.PossibleDirections();
 
@@ -1987,7 +1966,7 @@ namespace PacmanAI
             }
 
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine(string.Format("SESSION ID: {0}",m_TestSessionID));
+            //Console.WriteLine(string.Format("SESSION ID: {0}",m_TestSessionID));
             Console.WriteLine(string.Format("MAX PILLS EATEN: {0}", m_TestStats.MaxPillsTaken));
             Console.WriteLine(string.Format("MIN PILLS EATEN: {0}", m_TestStats.MinPillsTaken));
             Console.WriteLine(string.Format("GAMES PLAYED: {0}", m_TestStats.TotalGames));
@@ -2262,7 +2241,7 @@ namespace PacmanAI
             {
                 m_TreeRoot.Draw(g);
 
-                g.DrawImage(m_RedBlock, new Point(m_TreeRoot.PathNode.CenterX - 2, m_TreeRoot.PathNode.CenterY - 2));
+                //g.DrawImage(m_RedBlock, new Point(m_TreeRoot.PathNode.CenterX - 2, m_TreeRoot.PathNode.CenterY - 2));
 
                 g.DrawString(m_TreeRoot.AverageScore.ToString(), new Font(FontFamily.GenericSansSerif,10f), Brushes.White,
                              m_TreeRoot.PathNode.CenterX, m_TreeRoot.PathNode.CenterY);
@@ -2274,7 +2253,7 @@ namespace PacmanAI
             {
                 m_EndGameRoot.Draw(g);
 
-                g.DrawImage(m_RedBlock, new Point(m_EndGameRoot.PathNode.CenterX - 2, m_EndGameRoot.PathNode.CenterY - 2));
+                //g.DrawImage(m_RedBlock, new Point(m_EndGameRoot.PathNode.CenterX - 2, m_EndGameRoot.PathNode.CenterY - 2));
 
                 g.DrawString(m_EndGameRoot.AverageScore.ToString(), new Font(FontFamily.GenericSansSerif, 10f), Brushes.White,
                              m_EndGameRoot.PathNode.CenterX, m_EndGameRoot.PathNode.CenterY);

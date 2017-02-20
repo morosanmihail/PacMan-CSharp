@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using Accord.Math;
 using Accord.Statistics;
 using PacmanGameLogic.Automation;
+using Accord.Statistics.Distributions.Univariate;
 
 namespace PacmanAI
 {
@@ -41,7 +42,6 @@ namespace PacmanAI
 		private static long ms = 0;
 		private static List<double> scores = new List<double>();
         private static bool m_RemainQuiet = false;
-        private static bool run_Online = false;
 
         /// <summary>
         /// Take in the launch arguments that are generated when the program is
@@ -111,8 +111,13 @@ namespace PacmanAI
                 HandleArguments(args);
             }
 
+            string HostName = "localhost";
+
             if (!_takearguments)
             {
+                Console.WriteLine("Host name:");
+                HostName = Console.ReadLine();
+
                 Console.Clear();
                 Console.WriteLine("How many games do you wish to simulate?");
                 string _count = Console.ReadLine();
@@ -137,7 +142,7 @@ namespace PacmanAI
                 while (_consoleoutput != "n" && _consoleoutput != "y")
                 {
                     // Determine if we want to log output to be silence while we do this
-                    Console.WriteLine("Silence output? y/n");
+                    Console.WriteLine("Silence output?");
                     _consoleoutput = Console.ReadLine();
                 }
 
@@ -148,25 +153,6 @@ namespace PacmanAI
                 else if (_consoleoutput == "y")
                 {
                     m_RemainQuiet = true;
-                }
-
-                Console.Clear();
-                _consoleoutput = "";
-
-                while (_consoleoutput != "n" && _consoleoutput != "y")
-                {
-                    // Determine if we want to log output to be silence while we do this
-                    Console.WriteLine("Use online (RabbitMQ) game runner? y/n");
-                    _consoleoutput = Console.ReadLine();
-                }
-
-                if (_consoleoutput == "n")
-                {
-                    run_Online = false;
-                }
-                else if (_consoleoutput == "y")
-                {
-                    run_Online = true;
                 }
             }
 
@@ -187,7 +173,7 @@ namespace PacmanAI
             Console.WriteLine(" 1 - LucPacScripted");
             Console.WriteLine(" 2 - LucPac (MCTS)");
             Console.WriteLine(" 3 - MMLocPac (Evolved Neural Network) from .nn file");
-            Console.WriteLine(" 4 - SimRandom");
+            Console.WriteLine(" 5 - SimRandom");
             int Selection = int.Parse(Console.ReadKey().KeyChar.ToString());
 
             switch (Selection)
@@ -206,20 +192,66 @@ namespace PacmanAI
                     break;
             }
 
-            Console.WriteLine();
 
             var GR = new GameRunner();
-            GameRunnerResults GRR = null;
 
-            if (run_Online)
+            var Base = new double[9] { 3.0, 2.8, 2.8, 2.8, 2.8, 1.5, 1.5, 1.5, 1.5 };
+            var Params = new double[9] {0.07,0.01,0.02,-0.16,0.06,-0.05,0,0.06,-0.09 };
+            //var Params = new double[9] { -0.17, 0.01, 0.02, -0.16, 0.06, -0.05, 0, 0.06, -0.09 };
+
+           // Params = Params.Add(Base);
+
+            string TestAgent = "PacmanAI.UncertainAgent,PacmanAI";
+
+            var GRR = GR.RunGamesOnline(HostName,gamesToPlay, 
+                controller.GetType().Name
+                //TestAgent
+                , new Random().Next(), 
+                //null
+                new List<double>(Params)
+                );
+
+            var NewScores = new List<double>();
+            NewScores.AddRange(GRR.scores);
+            for (int i = 0; i < NewScores.Count; i++)
+                NewScores[i] += 9000;
+            NewScores.AddRange(GRR.scores);
+
+            var ZeroScores = new List<double>();
+            for(int i=0;i<100;i++)
             {
-                GRR = GR.RunGamesOnline(gamesToPlay, controller.GetType().Name, 0, null);
-            } else
-            {
-                GRR = GR.RunGames(gamesToPlay, controller, 0, null);
+                ZeroScores.Add(0);
             }
 
             Console.WriteLine("Done - " + GRR.scores.Average() + " " + GRR.gamesPlayed);
+            Console.WriteLine("Scores over 1600: " + GRR.scores.Where(s => s >= 1600).Count());
+
+            Console.WriteLine("Done (Altered) - " + NewScores.Average() + " " + GRR.gamesPlayed);
+            Console.WriteLine("Scores over 1500 (Altered): " + NewScores.Where(s => s >= 1500).Count());
+
+            /*Console.WriteLine("Evaluation score via distribution evaluation: " + new DistributionWeightEvaluation(null).CalculateFitnessScore(GRR.scores, 5000, 1));
+            Console.WriteLine("Evaluation score via average evaluation: " + new AccurateThresholdEvaluation(null).CalculateFitnessScore(GRR.scores, 5000, 1));
+
+
+            Console.WriteLine("Evaluation score via distribution evaluation (All zeroes): " + new DistributionWeightEvaluation(null).CalculateFitnessScore(ZeroScores, 1500, 1));
+            Console.WriteLine("Evaluation score via average evaluation (All zeroes): " + new AccurateThresholdEvaluation(null).CalculateFitnessScore(ZeroScores, 1500, 1));
+
+            Console.WriteLine("Evaluation score via distribution evaluation (Altered scores): " + new DistributionWeightEvaluation(null).CalculateFitnessScore(NewScores, 5000, 1));
+            Console.WriteLine("Evaluation score via average evaluation (Altered scores): " + new AccurateThresholdEvaluation(null).CalculateFitnessScore(NewScores, 5000, 1));
+
+            var gaussianDist = new Accord.Statistics.Distributions.Univariate.NormalDistribution(2000, 10);
+
+            Console.WriteLine("Evaluation score via distribution evaluation (Gaussian scores): " + new DistributionWeightEvaluation(null).CalculateFitnessScore(gaussianDist.Generate(100).ToList(), 2000, 1));
+            Console.WriteLine("Evaluation score via average evaluation (Gaussian scores): " + new AccurateThresholdEvaluation(null).CalculateFitnessScore(gaussianDist.Generate(100).ToList(), 2000, 1));
+            */
+            Accord.Statistics.Distributions.Univariate.EmpiricalDistribution rdb = new Accord.Statistics.Distributions.Univariate.EmpiricalDistribution(GRR.scores.ToArray(),25);
+            Accord.Controls.DataSeriesBox.Show("Pacman score distribution", rdb.ProbabilityDensityFunction, new Accord.DoubleRange(-2000, 12000));
+            Accord.Statistics.Distributions.Univariate.EmpiricalDistribution rdb2 = new Accord.Statistics.Distributions.Univariate.EmpiricalDistribution(NewScores.ToArray());
+            Accord.Controls.DataSeriesBox.Show("Pacman score distribution (Altered)", rdb2.ProbabilityDensityFunction, new Accord.DoubleRange(-2000, 12000));
+
+            double[] coef = { 4,1 };
+            var skewNormal = new Mixture<NormalDistribution>(coef, new NormalDistribution(2000, 1500), new NormalDistribution(7000, 1500));// new SkewNormalDistribution(4500, 3000, 7.2);
+            Accord.Controls.DataSeriesBox.Show("Skew Normal", skewNormal.ProbabilityDensityFunction, new Accord.DoubleRange(-2000, 12000));
 
             Console.ReadKey();
 

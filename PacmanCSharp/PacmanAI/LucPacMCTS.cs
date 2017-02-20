@@ -52,23 +52,12 @@ namespace PacmanAI
         public static GameState m_GameState;
         public static GameState m_PreviousGameState;
 
-        public static Image m_GreenBlock = null;
-        public static Image m_RedBlock = null;
-        public static Image m_BlueBlock = null;
-
         private int m_MCTSTimeBegin = 0;
         private int m_MCTSTimeEnd = 0;
 
         #region Constructor
         public LucPacMCTS() : base("LucPacMCTS")
         {
-            m_GreenBlock = Image.FromFile("green_block.png");
-            m_RedBlock = Image.FromFile("red_block.png");
-            m_BlueBlock = Image.FromFile("blue_block.png");
-
-            LucPac.m_GreenBlock = m_GreenBlock = Image.FromFile("green_block.png");
-            LucPac.m_RedBlock = Image.FromFile("red_block.png");
-            LucPac.m_BlueBlock = Image.FromFile("blue_block.png");
             instance = this;
 
             // Create the session ID that will be used for testing 

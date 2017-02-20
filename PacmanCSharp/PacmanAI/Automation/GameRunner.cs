@@ -40,7 +40,7 @@ namespace PacmanGameLogic.Automation
         GameRunnerResults grr;
         GameState gs;
 
-        string GetRemoteGameResults(RPCData sendData)
+        string GetRemoteGameResults(RPCData sendData, string HostName)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace PacmanGameLogic.Automation
                 {
                     try
                     {
-                        rpcClient = new RPCClient();
+                        rpcClient = new RPCClient(HostName);
                     }
                     catch
                     {
@@ -79,9 +79,9 @@ namespace PacmanGameLogic.Automation
             }
         }
 
-        public GameRunnerResults RunGamesOnline(int gamesToPlay, string controller, int RandomSeed = 0, List<double> gameParameters = null)
+        public GameRunnerResults RunGamesOnline(string HostName, int gamesToPlay, string controller, int RandomSeed = 0, List<double> gameParameters = null)
         {
-            grr = new GameRunnerResults();
+            var grr2 = new GameRunnerResults();
 
             RPCData sendData = new RPCData();
             MapData md = new MapData(gameParameters);
@@ -92,9 +92,9 @@ namespace PacmanGameLogic.Automation
             sendData.MaxScore = 0;
             sendData.RandomSeed = RandomSeed;
 
-            var Results = GetRemoteGameResults(sendData);
+            var Results = GetRemoteGameResults(sendData, HostName);
 
-            grr.scores = new List<double>();
+            grr2.scores = new List<double>();
             if (gamesToPlay > 0)
             {
                 //foreach (var Results in RunResults)
@@ -110,21 +110,21 @@ namespace PacmanGameLogic.Automation
                                 int Ghosts = int.Parse(result[0]);
                                 int Pills = int.Parse(result[1]);
                                 int Score = int.Parse(result[2]);
-                                grr.totalGhostsEaten += Ghosts;
-                                grr.pillsEatenTotal += Pills;
+                                grr2.totalGhostsEaten += Ghosts;
+                                grr2.pillsEatenTotal += Pills;
                                 //grr.TotalGames[Level]++;
-                                grr.totalScore += Score;
+                                grr2.totalScore += Score;
 
-                                grr.scores.Add(Score);
+                                grr2.scores.Add(Score);
                             }
                         }
                     }
                 }
             }
 
-            grr.gamesPlayed = gamesToPlay;
+            grr2.gamesPlayed = gamesToPlay;
 
-            return grr;
+            return grr2;
         }
 
         public GameRunnerResults RunGames(int gamesToPlay, BasePacman controller, int RandomSeed = 0, List<double> gameParameters = null)

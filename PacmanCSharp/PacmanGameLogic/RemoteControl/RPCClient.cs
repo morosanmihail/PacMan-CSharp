@@ -20,6 +20,7 @@ namespace Pacman.GameLogic.RemoteControl
             var factory = new ConnectionFactory() {
                 HostName = Host
             };
+            factory.RequestedHeartbeat = 30;
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             replyQueueName = channel.QueueDeclare().QueueName;

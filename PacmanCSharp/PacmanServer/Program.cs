@@ -1,6 +1,7 @@
 ﻿using Pacman.GameLogic;
 using Pacman.GameLogic.RemoteControl;
 using PacmanAI;
+using PacmanServer;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
@@ -74,102 +75,25 @@ namespace StarCraftServer
             Results = "";
         }
 
-        private static void GameOverParallelHandler(object sender, EventArgs args)
+        static BasePacman GetNewController(RPCData CustomData)
         {
-            GameState GS = sender as GameState;
-
-            GS.PausePlay();
-
-            highestScore = Math.Max(highestScore, GS.Pacman.Score);
-            lowestScore = Math.Min(lowestScore, GS.Pacman.Score);
-
-            totalScore += GS.Pacman.Score;
-            gamesPlayed++;
-            
-            Results += GS.m_GhostsEaten + "," + GS.m_PillsEaten + "," + GS.Pacman.Score + "\n";
-        }
-
-        public static void RunGamesParallel(RPCData CustomData)
-        {
-            Reset();
-            try
+            switch (CustomData.AIToUse)
             {
-                gamesToPlay = CustomData.GamesToPlay;
-                BasePacman controller = null;
-
-                if (CustomData.AIToUse.Equals("LucPacScripted"))
-                {
-                    controller = new LucPacScripted();
+                case "LucPacScripted":
                     LucPacScripted.REMAIN_QUIET = true;
-                }
-                if (CustomData.AIToUse.Equals("MMPac"))
-                {
-                    controller = new MMPac.MMPac(); //TODO: take default best NN Data
-                }
-                if (CustomData.AIToUse.Equals("MMLocPac"))
-                {
-                    controller = new MMPac.MMLocPac(); //TODO: take default best NN Data
-                }
-                if (CustomData.AIToUse.Equals("LucPac"))
-                {
-                    controller = new LucPac();
-                }
-
-                List<GameState> PGames = new List<GameState>();
-
-                for(int i=0;i<gamesToPlay;i++)
-                {
-                    var GS = new GameState(CustomData.MapData.EvolvedValues, 0);
-                    GS.StartPlay();
-                    GS.Controller = controller;
-                    GS.GameOver += new EventHandler(GameOverParallelHandler);
-                    PGames.Add(GS);
-                }
-
-                bool Over = false;
-
-                while(!Over) 
-                {
-                    foreach (var GS in PGames)
-                    {
-                        Direction direction = controller.Think(GS);
-                        GS.Pacman.SetDirection(direction);
-                        
-                        GS.Update();
-                    }
-
-                    var AvgScore = PGames.Where(c => c.Started).Sum(c => c.Pacman.Score);
-                    AvgScore += totalScore;
-                    AvgScore = AvgScore / gamesToPlay;
-
-                    Over = (AvgScore > CustomData.MaxScore);
-
-                    Over = Over || gamesToPlay == gamesPlayed;
-
-                    Console.Clear();
-                    Console.WriteLine("Simulating ... ");
-                    Console.WriteLine(" - Current avg: " + AvgScore);
-                }
-
-                if(gamesPlayed < gamesToPlay)
-                {
-                    //Early exit done
-                    foreach(var GS in PGames.Where(c => c.Started))
-                    {
-                        GameOverParallelHandler(GS, null);
-                    }
-                }
-
-                controller.SimulationFinished();
-
-                Console.Clear();
-                Console.WriteLine("Games played: " + gamesPlayed);
-                Console.WriteLine("Avg. score: " + (totalScore / gamesPlayed));
-                Console.WriteLine("Highest score: " + highestScore + " points");
-                Console.WriteLine("Lowest score: " + lowestScore + " points");
-            }
-            catch(Exception e) {
-                Console.WriteLine("Error: " + e.Message);
+                    return new LucPacScripted();
+                case "MMPac":
+                    return new MMPac.MMPac(CustomData.MapData.EvolvedValues);
+                case "MMLocPac":
+                    if (CustomData.MapData.EvolvedValues.Count < 25)
+                        return new MMPac.MMLocPac("NeuralNetworkLocPac.nn");
+                    else
+                        return new MMPac.MMLocPac(CustomData.MapData.EvolvedValues);
+                case "LucPac":
+                    LucPac.REMAIN_QUIET = true;
+                    return new LucPac();
+                default:
+                    return (BasePacman)Activator.CreateInstance(Type.GetType(CustomData.AIToUse), new object[] { });
             }
         }
 
@@ -196,7 +120,10 @@ namespace StarCraftServer
                 }
 
                 //BasePacman controller = new TestPac();
-                if(CustomData.AIToUse.Equals("LucPacScripted"))
+
+                controller = GetNewController(CustomData);
+
+                /*if(CustomData.AIToUse.Equals("LucPacScripted"))
                 {
                     controller = new LucPacScripted();
                     LucPacScripted.REMAIN_QUIET = true;
@@ -218,7 +145,7 @@ namespace StarCraftServer
                 {
                     controller = new LucPac();
                     LucPac.REMAIN_QUIET = true;
-                }
+                }*/
 
                 
                 gs.GameOver += new EventHandler(GameOverHandler);
@@ -229,6 +156,7 @@ namespace StarCraftServer
                 Stopwatch watch = new Stopwatch();
                 int percentage = -1;
                 int lastUpdate = 0;
+                int lastGamesPlayed = 0;
                 watch.Start();
                 while (gamesPlayed < gamesToPlay)
                 {
@@ -264,6 +192,15 @@ namespace StarCraftServer
                     // update game
                     gs.Update();
                     ms += GameState.MSPF;
+
+                    if(lastGamesPlayed != gamesPlayed)
+                    {
+                        //Game finished, recreate controller
+                        controller = GetNewController(CustomData);
+                        gs.Controller = controller;
+
+                        lastGamesPlayed = gamesPlayed;
+                    }
                 }
                 watch.Stop();
 
@@ -314,8 +251,6 @@ namespace StarCraftServer
                 Console.WriteLine("Connecting to host " + HostName);
                 try
                 {
-
-
                     using (var connection = factory.CreateConnection())
                     using (var channel = connection.CreateModel())
                     {
@@ -356,14 +291,21 @@ namespace StarCraftServer
                                     customData = (RPCData)serializer.Deserialize(reader);
                                 }
 
-                                if(!customData.Parallel)
+                                if (customData.AIToUse.Substring(0,6) != "Simple")
                                 {
                                     RunGameLinear(customData);
-                                } else
-                                {
-                                    RunGamesParallel(customData);
                                 }
-                                
+                                else
+                                {
+                                    Reset();
+                                    var NonPac = new BarebonesNonPacmanGenerator();
+                                    var Scores = NonPac.GenerateScoresFromIndividual(customData.MapData.EvolvedValues.ToArray(), customData.GamesToPlay, customData.AIToUse.Contains("Skew"), customData.AIToUse.Contains("Bimodal"));
+                                    foreach (var S in Scores)
+                                    {
+                                        Program.Results += "0,0," + (int)S + "\n";
+                                    }
+                                }
+
                                 response = Program.Results;
                             }
                             catch (Exception e)
