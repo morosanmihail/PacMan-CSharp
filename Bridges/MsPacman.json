@@ -5,6 +5,8 @@
 			"name": "PacmanSpeed",
 			"rangeMin": "-3",
 			"rangeMax": "5",
+			"rangeAccuracy": "10",
+			"minimise": "0", //-1 to maximise, 0 to ignore, 1 to minimise
 			"weight": "1",
 			"custom":{
 				"index":"0",
@@ -14,6 +16,8 @@
 			"name": "Ghost1Speed",
 			"rangeMin": "-3",
 			"rangeMax": "5",
+			"rangeAccuracy": "10",
+			"minimise": "1",
 			"weight": "1",
 			"custom":{
 				"index":"1",
@@ -42,6 +46,19 @@
 			"weight": "5",
 		},
 	],
+	"gaparams": {
+		"Par_MaxGenerations": "100000",
+		"Par_GenCountBeforeRefresh": "0",
+		"Par_IslandClusters": "1",
+		"Par_MaxPopMembers": "20",
+		"Par_Seed": "10002",
+		"Par_KeepEliteRatio": "0.15",
+		"Par_KeepRandRatio": "0.0",
+		"Par_MutateRatio": "0.5",
+		"Par_CrossoverRatio": "0.25",
+		"Par_TournamentSize": "6",
+		"extra_MutationChance": "0.5",
+	},
 	"bridge": {
 		//"type": "remote",
 		//"server": "localhost",
