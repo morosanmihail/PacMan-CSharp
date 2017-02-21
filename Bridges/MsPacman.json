@@ -1,0 +1,56 @@
+{
+	"name": "Ms Pacman",
+	"parameters": [
+		{
+			"name": "PacmanSpeed",
+			"rangeMin": "-3",
+			"rangeMax": "5",
+			"weight": "1",
+			"custom":{
+				"index":"0",
+			}
+		},
+		{
+			"name": "Ghost1Speed",
+			"rangeMin": "-3",
+			"rangeMax": "5",
+			"weight": "1",
+			"custom":{
+				"index":"1",
+			}
+		}
+	],
+	"metrics": [
+		{
+			"name": "Scores",
+			"type": "List",
+		},
+	],
+	"evaluators": [
+		{
+			"name": "ScoreAverageEval",
+			"type": "average",
+			"metric": "Scores",
+			"target": "1500",
+			"weight": "5",
+		},
+		{
+			"name": "ScoreMedianEval",
+			"type": "median",
+			"metric": "Scores",
+			"target": "1500",
+			"weight": "5",
+		},
+	],
+	"bridge": {
+		//"type": "remote",
+		//"server": "localhost",
+		//"port": "",
+		"type": "local",
+		"executable": "PacmanBalanceBridge.exe \"%0\" \"%1\" \"%2\"", //%0 = path to this json, %1 = randseed, %2 = params
+	},
+	"custom": {
+		"AIAgent": "LucPacScripted",
+		"NumberOfGames": "20",
+	}
+}
