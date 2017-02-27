@@ -6,7 +6,7 @@
 			"rangeMin": "-3",
 			"rangeMax": "5",
 			"rangeAccuracy": "10",
-			"minimise": "0", //-1 to maximise, 0 to ignore, 1 to minimise
+			"minimise": "ignore", //"maximise" to maximise, "ignore" to ignore, "minimise" to minimise
 			"weight": "1",
 			"custom":{
 				"index":"0",
@@ -24,24 +24,33 @@
 			}
 		}
 	],
-	"metrics": [
-		{
-			"name": "Scores",
+	"metrics": {
+		"Scores" : {
 			"type": "List",
 		},
-	],
+		"OtherMetric" : {
+			"type": "Double",
+		},
+	},
 	"evaluators": [
 		{
 			"name": "ScoreAverageEval",
-			"type": "average",
+			"type": "GeneticAlgorithm.Evaluators.AverageEvaluator,GeneticAlgorithm",
 			"metric": "Scores",
 			"target": "1500",
 			"weight": "5",
 		},
 		{
 			"name": "ScoreMedianEval",
-			"type": "median",
+			"type": "GeneticAlgorithm.Evaluators.MedianEvaluator,GeneticAlgorithm",
 			"metric": "Scores",
+			"target": "1500",
+			"weight": "5",
+		},
+		{
+			"name": "SomethingElse",
+			"type": "GeneticAlgorithm.Evaluators.AverageEvaluator,GeneticAlgorithm",
+			"metric": "OtherMetric",
 			"target": "1500",
 			"weight": "5",
 		},
@@ -63,8 +72,10 @@
 		//"type": "remote",
 		//"server": "localhost",
 		//"port": "",
+		//"username": "",
+		//"password": "",
 		"type": "local",
-		"executable": "PacmanBalanceBridge.exe \"%0\" \"%1\" \"%2\"", //%0 = path to this json, %1 = randseed, %2 = params
+		"executable": "F:/GitHub/PacMan-CSharp/Binaries/PacmanBalanceBridge.exe \"%0\" \"%1\" \"%2\"", //%0 = path to this json, %1 = randseed, %2 = params
 	},
 	"custom": {
 		"AIAgent": "LucPacScripted",

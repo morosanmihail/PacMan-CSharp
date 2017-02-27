@@ -22,7 +22,10 @@ namespace PacmanBalanceBridge
             List<double> Params = new List<double>(Base);
 
             if (args == null || args.Length < 3)
+            {
+                Console.WriteLine("Exited due to lack of arguments");
                 return;
+            }
 
             string PathSpecs = args[0];
             RandSeed = int.Parse(args[1]);
@@ -48,13 +51,24 @@ namespace PacmanBalanceBridge
 
             //string MetricScores = JsonConvert.SerializeObject(RunResults.scores);
             JArray o = JArray.FromObject(RunResults.scores);
+
+            Dictionary<string, object> collection = new Dictionary<string, object>()
+            {
+                {"Scores", o},
+                {"OtherMetric", 1200}
+            };
+
             JObject Result = new JObject(
                 new JProperty("metrics",
-                    new JArray(
+                    JObject.FromObject(collection)
+                    /*new JArray(
                         new JObject(
                             new JProperty("Scores", o)
-                        )
-                    )
+                        ),
+                        new JObject(
+                            new JProperty("OtherMetric", 1200)
+                            )
+                   // ) */
                 )
             );
 
