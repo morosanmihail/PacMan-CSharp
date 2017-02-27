@@ -1,4 +1,6 @@
-﻿using Pacman.GameLogic;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Pacman.GameLogic;
 using Pacman.GameLogic.RemoteControl;
 using PacmanAI;
 using PacmanServer;
@@ -56,7 +58,8 @@ namespace StarCraftServer
         private static long ms = 0;
         
         public static string Results = "";
-        
+
+        public static List<double> Scores = new List<double>();
 
         public static void Reset()
         {
@@ -73,6 +76,8 @@ namespace StarCraftServer
             totalGhostsEaten = 0;
 
             Results = "";
+
+            Scores = new List<double>();
         }
 
         static BasePacman GetNewController(RPCData CustomData)
@@ -207,6 +212,22 @@ namespace StarCraftServer
                 // shut down controller
                 controller.SimulationFinished();
 
+                JArray o = JArray.FromObject(Scores);
+
+                Dictionary<string, object> collection = new Dictionary<string, object>()
+                {
+                    {"Scores", o},
+                    {"OtherMetric", 1200}
+                };
+
+                JObject Result = new JObject(
+                    new JProperty("metrics",
+                        JObject.FromObject(collection)
+                    )
+                );
+
+                Results = Result.ToString();
+
                 // output results
                 Console.Clear();
                 long seconds = ms / 1000;
@@ -283,13 +304,29 @@ namespace StarCraftServer
                                 //int n = int.Parse(message);
                                 Console.WriteLine(" [.] RunGame()");
 
-                                var serializer = new XmlSerializer(typeof(RPCData));
+                                /*var serializer = new XmlSerializer(typeof(RPCData));
                                 RPCData customData;
 
                                 using (TextReader reader = new StringReader(message))
                                 {
                                     customData = (RPCData)serializer.Deserialize(reader);
+                                }*/
+                                dynamic JResults = JsonConvert.DeserializeObject(message);
+
+                                var Base = new double[9] { 3.0, 2.8, 2.8, 2.8, 2.8, 1.5, 1.5, 1.5, 1.5 };
+                                List<double> Params = new List<double>(Base);
+
+                                RPCData customData = new RPCData();
+                                customData.AIToUse = JResults.custom.AIAgent;
+                                customData.GamesToPlay = JResults.custom.NumberOfGames;
+
+                                foreach(var Param in JResults.parameters)
+                                {
+                                    Params[(int)Param.custom.index] += (double)Param.value;
                                 }
+
+                                customData.MapData = new MapData(Params);
+                                customData.RandomSeed = (int)JResults.randomseed;
 
                                 if (customData.AIToUse.Substring(0,6) != "Simple")
                                 {
@@ -361,7 +398,9 @@ namespace StarCraftServer
             gamesPlayed++;
             lastMs = ms;
 
-            Results += gs.m_GhostsEaten + "," + gs.m_PillsEaten + "," + gs.Pacman.Score + "\n";
+            //Results += gs.m_GhostsEaten + "," + gs.m_PillsEaten + "," + gs.Pacman.Score + "\n";
+
+            Scores.Add(gs.Pacman.Score);
         }
     }
 }

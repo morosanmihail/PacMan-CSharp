@@ -69,13 +69,13 @@
 		"extra_MutationChance": "0.5",
 	},
 	"bridge": {
-		//"type": "remote",
-		//"server": "localhost",
-		//"port": "",
-		//"username": "",
-		//"password": "",
-		"type": "local",
-		"executable": "F:/GitHub/PacMan-CSharp/Binaries/PacmanBalanceBridge.exe \"%0\" \"%1\" \"%2\"", //%0 = path to this json, %1 = randseed, %2 = params
+		"type": "remote",
+		"server": "localhost",
+		"port": "5672",
+		"username": "",
+		"password": "",
+		//"type": "local",
+		//"executable": "F:/GitHub/PacMan-CSharp/Binaries/PacmanBalanceBridge.exe \"%0\" \"%1\" \"%2\"", //%0 = path to this json, %1 = randseed, %2 = params
 	},
 	"custom": {
 		"AIAgent": "LucPacScripted",
