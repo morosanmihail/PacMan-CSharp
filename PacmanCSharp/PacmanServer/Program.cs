@@ -322,7 +322,7 @@ namespace StarCraftServer
 
                                 foreach(var Param in JResults.parameters)
                                 {
-                                    if ((int)Param.enabled == 1)
+                                    if ((bool)Param.enabled == true)
                                     {
                                         Params[(int)Param.custom.index] += (double)Param.value;
                                     }
