@@ -322,7 +322,10 @@ namespace StarCraftServer
 
                                 foreach(var Param in JResults.parameters)
                                 {
-                                    Params[(int)Param.custom.index] += (double)Param.value;
+                                    if ((int)Param.enabled == 1)
+                                    {
+                                        Params[(int)Param.custom.index] += (double)Param.value;
+                                    }
                                 }
 
                                 customData.MapData = new MapData(Params);

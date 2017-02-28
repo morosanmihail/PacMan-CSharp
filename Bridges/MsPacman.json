@@ -10,18 +10,32 @@
 			"weight": "1",
 			"custom":{
 				"index":"0",
-			}
+			},
+			"enabled": "1",
 		},
 		{
 			"name": "Ghost1Speed",
 			"rangeMin": "-3",
 			"rangeMax": "5",
 			"rangeAccuracy": "10",
-			"minimise": "1",
+			"minimise": "minimise",
 			"weight": "1",
 			"custom":{
 				"index":"1",
-			}
+			},
+			"enabled": "1",
+		},
+		{
+			"name": "Ghost2Speed",
+			"rangeMin": "-3",
+			"rangeMax": "5",
+			"rangeAccuracy": "10",
+			"minimise": "minimise",
+			"weight": "1",
+			"custom":{
+				"index":"3",
+			},
+			"enabled": "0",
 		}
 	],
 	"metrics": {
@@ -39,6 +53,7 @@
 			"metric": "Scores",
 			"target": "1500",
 			"weight": "5",
+			"enabled": "1",
 		},
 		{
 			"name": "ScoreMedianEval",
@@ -46,6 +61,7 @@
 			"metric": "Scores",
 			"target": "1500",
 			"weight": "5",
+			"enabled": "0",
 		},
 		{
 			"name": "SomethingElse",
@@ -53,6 +69,7 @@
 			"metric": "OtherMetric",
 			"target": "1500",
 			"weight": "5",
+			"enabled": "0",
 		},
 	],
 	"gaparams": {
