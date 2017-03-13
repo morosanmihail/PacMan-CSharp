@@ -59,7 +59,7 @@
 	"evaluators": [
 		{
 			"name": "ScoreAverageEval",
-			"type": "GeneticAlgorithm.Evaluators.AverageEvaluator,GeneticAlgorithm",
+			"type": "AverageEvaluator",
 			"metric": "Scores",
 			"target": 1500,
 			"weight": 5,
@@ -67,7 +67,7 @@
 		},
 		{
 			"name": "ScoreMedianEval",
-			"type": "GeneticAlgorithm.Evaluators.MedianEvaluator,GeneticAlgorithm",
+			"type": "MedianEvaluator",
 			"metric": "Scores",
 			"target": 1500,
 			"weight": 5,
@@ -75,7 +75,7 @@
 		},
 		{
 			"name": "SomethingElse",
-			"type": "GeneticAlgorithm.Evaluators.AverageEvaluator,GeneticAlgorithm",
+			"type": "AverageEvaluator",
 			"metric": "OtherMetric",
 			"target": 1500,
 			"weight": 5,
@@ -102,7 +102,7 @@
 		"username": "",
 		"password": "",
 		//"type": "local",
-		//"executable": "F:/GitHub/PacMan-CSharp/Binaries/PacmanBalanceBridge.exe \"%0\" \"%1\" \"%2\"", //%0 = path to this json, %1 = randseed, %2 = params
+		"executable": "F:/GitHub/PacMan-CSharp/Binaries/PacmanBalanceBridge.exe \"%0\" \"%1\" \"%2\"", //%0 = path to this json, %1 = randseed, %2 = params
 	},
 	"custom": {
 		"AIAgent": "LucPacScripted",
