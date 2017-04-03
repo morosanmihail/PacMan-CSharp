@@ -94,6 +94,12 @@
 		"Par_CrossoverRatio": 0.25,
 		"Par_TournamentSize": 6,
 		"extra_MutationChance": 0.5,
+		"extra_use_predictor": true,
+		"string_PredictorType": "NeuralNetworkPredictor",
+		"extra_Predictor_HiddenLayerCount": 18,
+		"extra_Predictor_MaxTrainingData": 100,
+		"extra_Predictor_MinTrainingData": 100,
+		"extra_Predictor_TrainingEpochs": 100,
 	},
 	"bridge": {
 		"type": "remote",
