@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using Pacman.GameLogic;
 using Pacman.GameLogic.RemoteControl;
 using PacmanAI;
-using PacmanServer;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
@@ -17,7 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace StarCraftServer
+namespace PacmanServer
 {
     class Program
     {
@@ -319,33 +318,29 @@ namespace StarCraftServer
                                 RPCData customData = new RPCData();
                                 customData.AIToUse = JResults.custom.AIAgent;
                                 customData.GamesToPlay = JResults.custom.NumberOfGames;
-
-                                foreach(var Param in JResults.parameters)
+                                
+                                foreach (var Param in JResults.parameters)
                                 {
                                     if ((bool)Param.enabled == true)
                                     {
-                                        Params[(int)Param.custom.index] += (double)Param.value;
+                                        if (((string)Param.name).Equals("neuralnet"))
+                                        {
+                                            Params = new List<double>(Param.value.ToObject<List<double>>());
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            Params[(int)Param.custom.index] += (double)Param.value;
+                                        }
                                     }
                                 }
-
+                                
                                 customData.MapData = new MapData(Params);
+
                                 customData.RandomSeed = (int)JResults.randomseed;
 
-                                if (customData.AIToUse.Substring(0,6) != "Simple")
-                                {
-                                    RunGameLinear(customData);
-                                }
-                                else
-                                {
-                                    Reset();
-                                    var NonPac = new BarebonesNonPacmanGenerator();
-                                    var Scores = NonPac.GenerateScoresFromIndividual(customData.MapData.EvolvedValues.ToArray(), customData.GamesToPlay, customData.AIToUse.Contains("Skew"), customData.AIToUse.Contains("Bimodal"));
-                                    foreach (var S in Scores)
-                                    {
-                                        Program.Results += "0,0," + (int)S + "\n";
-                                    }
-                                }
-
+                                RunGameLinear(customData);
+                                
                                 response = Program.Results;
                             }
                             catch (Exception e)

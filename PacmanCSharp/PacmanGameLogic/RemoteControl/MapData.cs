@@ -12,9 +12,6 @@ namespace Pacman.GameLogic.RemoteControl
         public MapData MapData;
         public int GamesToPlay;
         public string AIToUse;
-        public int MaxScore;
-        public int MinScore;
-        public bool Parallel;
         public int RandomSeed;
     }
 

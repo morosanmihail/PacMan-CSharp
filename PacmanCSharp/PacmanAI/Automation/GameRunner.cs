@@ -88,8 +88,6 @@ namespace PacmanGameLogic.Automation
             sendData.MapData = md;
             sendData.GamesToPlay = gamesToPlay;
             sendData.AIToUse = controller;
-            sendData.Parallel = false;
-            sendData.MaxScore = 0;
             sendData.RandomSeed = RandomSeed;
 
             var Results = GetRemoteGameResults(sendData, HostName);
