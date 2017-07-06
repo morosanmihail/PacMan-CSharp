@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26206.0
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacmanGameLogic", "PacmanCSharp\PacmanGameLogic\PacmanGameLogic.csproj", "{867D9119-8BEF-44C3-9898-6880FA6640F4}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacmanServer", "PacmanCSharp\PacmanServer\PacmanServer.csproj", "{CA911419-2BE0-4AFD-BAC3-0135ADA58369}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacmanBalanceBridge", "PacmanCSharp\PacmanBalanceBridge\PacmanBalanceBridge.csproj", "{61229E38-FA9F-44A0-9254-5D23CCEF5ECD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralNetworkRunToFile", "PacmanCSharp\NeuralNetworkRunToFile\NeuralNetworkRunToFile.csproj", "{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +99,18 @@ Global
 		{61229E38-FA9F-44A0-9254-5D23CCEF5ECD}.Release|x64.Build.0 = Release|Any CPU
 		{61229E38-FA9F-44A0-9254-5D23CCEF5ECD}.Release|x86.ActiveCfg = Release|Any CPU
 		{61229E38-FA9F-44A0-9254-5D23CCEF5ECD}.Release|x86.Build.0 = Release|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Debug|x64.Build.0 = Debug|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Debug|x86.Build.0 = Debug|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Release|x64.ActiveCfg = Release|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Release|x64.Build.0 = Release|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Release|x86.ActiveCfg = Release|Any CPU
+		{8C751D05-F4EE-4445-A7A8-AA1A6DB5C57E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
