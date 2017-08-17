@@ -105,6 +105,7 @@ namespace Pacman.GameLogic
 
         // For registering how many pills have been eaten within the environment.
         public int m_PillsEaten = 0;
+        public int m_PowerPillsEaten = 0;
         public int m_GhostsEaten = 0;
 
         public int m_TotalRoundScore = 0;
@@ -527,6 +528,7 @@ namespace Pacman.GameLogic
             GameOver?.Invoke(this, null);
             m_TotalRoundScore = 0;
             m_PillsEaten = 0;
+            m_PowerPillsEaten = 0;
             m_GhostsEaten = 0;
 			ElapsedTime = 0;
 			level = 0;

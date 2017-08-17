@@ -59,6 +59,10 @@ namespace PacmanServer
         public static string Results = "";
 
         public static List<double> Scores = new List<double>();
+        public static List<double> GameLengths = new List<double>();
+        public static List<int> PillsEaten = new List<int>();
+        public static List<int> PowerPillsEaten = new List<int>();
+        public static List<int> GhostsEaten = new List<int>();
 
         public static void Reset()
         {
@@ -77,6 +81,10 @@ namespace PacmanServer
             Results = "";
 
             Scores = new List<double>();
+            GameLengths = new List<double>();
+            PillsEaten = new List<int>();
+            PowerPillsEaten = new List<int>();
+            GhostsEaten = new List<int>();
         }
 
         static BasePacman GetNewController(RPCData CustomData)
@@ -212,11 +220,19 @@ namespace PacmanServer
                 controller.SimulationFinished();
 
                 JArray o = JArray.FromObject(Scores);
+                JArray JGameLengths = JArray.FromObject(GameLengths);
+                JArray JPowerPills = JArray.FromObject(PowerPillsEaten);
+
+                JArray JPills = JArray.FromObject(PillsEaten);
+                JArray JGhosts = JArray.FromObject(GhostsEaten);
 
                 Dictionary<string, object> collection = new Dictionary<string, object>()
                 {
                     {"Scores", o},
-                    {"OtherMetric", 1200}
+                    {"Lengths", JGameLengths},
+                    {"PowerPills", JPowerPills },
+                    {"Pills", JPills },
+                    {"Ghosts", JGhosts }
                 };
 
                 JObject Result = new JObject(
@@ -376,6 +392,8 @@ namespace PacmanServer
         {
             longestGame = Math.Max(longestGame, ms - lastMs);
 
+            GameLengths.Add(ms - lastMs);
+
             highestScore = Math.Max(highestScore, gs.Pacman.Score);
             lowestScore = Math.Min(lowestScore, gs.Pacman.Score);
 
@@ -384,8 +402,13 @@ namespace PacmanServer
             maxPillsEaten = Math.Max(gs.m_PillsEaten, maxPillsEaten);
             minPillsEaten = Math.Min(gs.m_PillsEaten, minPillsEaten);
 
+            PillsEaten.Add(gs.m_PillsEaten);
+            PowerPillsEaten.Add(gs.m_PowerPillsEaten);
+
             maxGhostsEaten = Math.Max(gs.m_GhostsEaten, maxGhostsEaten);
             minGhostsEaten = Math.Min(gs.m_GhostsEaten, minGhostsEaten);
+
+            GhostsEaten.Add(gs.m_GhostsEaten);
             
             pillsEatenTotal += gs.m_PillsEaten;
 

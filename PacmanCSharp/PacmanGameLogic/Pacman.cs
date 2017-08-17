@@ -117,6 +117,10 @@ namespace Pacman.GameLogic
                     }
                 }
                 GameState.m_PillsEaten++;
+                if(GameState.Map.NodeData[Node.X,Node.Y] == Node.NodeType.PowerPill)
+                {
+                    GameState.m_PowerPillsEaten++;
+                }
                 GameState.Map.NodeData[Node.X,Node.Y] = Node.NodeType.None;
                 GameState.Map.Nodes[Node.X, Node.Y].Type = Node.NodeType.None;
                 GameState.Map.PillsLeft--;
@@ -146,6 +150,7 @@ namespace Pacman.GameLogic
 					if( GameState.Controller != null ) {
 						GameState.Controller.EatPill();
 					}
+                    GameState.m_PowerPillsEaten++;
 				}
 				Node.Type = Node.NodeType.None;
                 GameState.m_PillsEaten++;
