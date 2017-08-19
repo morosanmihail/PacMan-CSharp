@@ -21,6 +21,8 @@ namespace MMPac
 
         EvolutionWeights EvoWeights;
 
+        int ThinkTicker = 0;
+        Direction LastThink = Direction.None;
 
         List<Node> PathToTake = new List<Node>();
         Node bestNode = null;
@@ -126,64 +128,76 @@ namespace MMPac
 
         public override Direction Think(GameState gs)
         {
-            double bestScore = -10000;
-            //double[][] Scores = new double[gs.Map.Nodes.GetLength(0)][];
-
-            //List<Direction> possible = gs.Pacman.PossibleDirections();
-
-            foreach (var Node in gs.Map.Nodes)
-            //foreach(var Dir in possible)
+            if (ThinkTicker % 5 == 0)
             {
-                if (Node != gs.Pacman.Node && Node.ShortestPath[gs.Pacman.Node.X, gs.Pacman.Node.Y] != null)
+                double bestScore = -10000;
+                //double[][] Scores = new double[gs.Map.Nodes.GetLength(0)][];
+
+                //List<Direction> possible = gs.Pacman.PossibleDirections();
+
+                foreach (var Node in gs.Map.Nodes)
+                //foreach(var Dir in possible)
                 {
-                    //Node Node = gs.Pacman.Node.GetNeighbour(Dir);
-                    List<double> input = GenerateInput(gs, Node);
-                    double output = Network.Compute(input.ToArray())[0];
-                    //Scores[i][y] = output;
-                    if (output > bestScore)
+                    if (Node != gs.Pacman.Node && Node.ShortestPath[gs.Pacman.Node.X, gs.Pacman.Node.Y] != null)
                     {
-                        bestScore = output;
-                        bestNode = Node;
+                        //Node Node = gs.Pacman.Node.GetNeighbour(Dir);
+                        List<double> input = GenerateInput(gs, Node);
+                        double output = Network.Compute(input.ToArray())[0];
+                        //Scores[i][y] = output;
+                        if (output > bestScore)
+                        {
+                            bestScore = output;
+                            bestNode = Node;
+                        }
                     }
                 }
-            }
 
-            //List<double> input = GenerateInput(gs);
-            
-            //double[] output = Network.Compute(input.ToArray());
+                //List<double> input = GenerateInput(gs);
 
-            //PreviousOutput.Clear();
-            //PreviousOutput.AddRange(output);
+                //double[] output = Network.Compute(input.ToArray());
 
-            Direction Res = Direction.None;
+                //PreviousOutput.Clear();
+                //PreviousOutput.AddRange(output);
 
-            /*List<Direction> possible = gs.Pacman.PossibleDirections();
-            possible.Add(Direction.Stall);
+                Direction Res = Direction.None;
 
-            for(int i=0;i< OutputCount; i++)
-            {
-                if(!possible.Contains((Direction)i))
+                /*List<Direction> possible = gs.Pacman.PossibleDirections();
+                possible.Add(Direction.Stall);
+
+                for(int i=0;i< OutputCount; i++)
                 {
-                    output[i] = 0;
+                    if(!possible.Contains((Direction)i))
+                    {
+                        output[i] = 0;
+                    }
                 }
-            }
 
-            if (possible.Count > 0)
+                if (possible.Count > 0)
+                {
+                    var indexAtMax = output.ToList().IndexOf(output.Max());
+                    Res = (Direction)(indexAtMax);
+                }*/
+
+                //comment this out to remove A* search
+                bestNode = AStarGetBestRoute(gs, gs.Pacman.Node, bestNode);
+
+                var Path = gs.Pacman.Node.ShortestPath[bestNode.X, bestNode.Y];
+                if (Path != null)
+                {
+                    Res = Path.Direction;
+                }
+
+                ThinkTicker = 1;
+
+                LastThink = Res;
+
+                return Res;
+            } else
             {
-                var indexAtMax = output.ToList().IndexOf(output.Max());
-                Res = (Direction)(indexAtMax);
-            }*/
+                ThinkTicker++;
 
-            //comment this out to remove A* search
-            bestNode = AStarGetBestRoute(gs, gs.Pacman.Node, bestNode);
-
-            var Path = gs.Pacman.Node.ShortestPath[bestNode.X, bestNode.Y];
-            if(Path != null)
-            {
-                Res = Path.Direction;
+                return LastThink;
             }
-
-            return Res;
         }
 
         public static float Normalize(float Input, float Max)
