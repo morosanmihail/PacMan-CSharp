@@ -36,7 +36,7 @@ namespace NeuralNetworkRunToFile
             doc.Load(latestfile);
             
 
-            var Node = doc.DocumentElement.ChildNodes[2].ChildNodes[0].ChildNodes[8].ChildNodes[0].ChildNodes[5];
+            var Node = doc.DocumentElement.ChildNodes[2].ChildNodes[0].ChildNodes[9].ChildNodes[0].ChildNodes[6];
 
             List<double> Weights = new List<double>();
 

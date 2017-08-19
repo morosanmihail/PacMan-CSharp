@@ -145,12 +145,12 @@ namespace Pacman.GameLogic
                        // GameState.PacmanMortal = true;
 					}
 					GameState.ReverseGhosts();
-				} else {
+                    GameState.m_PowerPillsEaten++;
+                } else {
                     Score += 10;
 					if( GameState.Controller != null ) {
 						GameState.Controller.EatPill();
 					}
-                    GameState.m_PowerPillsEaten++;
 				}
 				Node.Type = Node.NodeType.None;
                 GameState.m_PillsEaten++;
