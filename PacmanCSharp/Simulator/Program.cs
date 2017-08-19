@@ -24,7 +24,16 @@ namespace Pacman.Simulator
             Console.WriteLine("Finding arguments...");
             //Console.WriteLine("Press Enter to exit");
 
-            startVisualizer();
+            string Agent = "";
+            string AgentFile = "";
+
+            if (args.Length > 1)
+            {
+                Agent = args[0];
+                AgentFile = args[1];
+            }
+
+            startVisualizer(Agent, AgentFile);
 						
 			while( true ) {
 				string input = Console.ReadLine();
@@ -42,9 +51,9 @@ namespace Pacman.Simulator
 			}
 		}
 
-		private static void startVisualizer() {
+		private static void startVisualizer(string Agent, string AgentFile) {
 			visualizerThread = new System.Threading.Thread(delegate() {
-				visualizer = new Visualizer();
+				visualizer = new Visualizer(Agent, AgentFile);
                 
                 System.Windows.Forms.Application.Run(visualizer);
 			});

@@ -47,6 +47,8 @@ namespace Pacman.Simulator
 		private bool collectionInProgress = false;
 		private bool collectionInputCalled = false;
 
+        private string AgentFile = "";
+
         // The name of the agent that is going to be loaded in
         public static string AgentName { get; set; }
 
@@ -74,8 +76,10 @@ namespace Pacman.Simulator
                 case 2:
                     return new LucPac();
                 case 3:
-
-                    return new MMPac.MMLocPac("NeuralNetworkLocPac.nn");
+                    if (AgentFile == "")
+                        return new MMPac.MMLocPac("NeuralNetworkLocPac.nn");
+                    else
+                        return new MMPac.MMLocPac(AgentFile);
                 case 6:
                     return new UncertainAgent();
                 case 7:
@@ -85,7 +89,7 @@ namespace Pacman.Simulator
             }
         }
 		
-		public Visualizer() {			
+		public Visualizer(string Agent, string AgentFile) {			
 			InitializeComponent();
 			KeyDown += new KeyEventHandler(keyDownHandler);
 			Picture.MouseDown += new MouseEventHandler(mouseDownHandler);
@@ -109,19 +113,29 @@ namespace Pacman.Simulator
             //tryLoadController("LucPac");
 
             //gameState.Controller = tryLoadController("LucPac");
-            
+
 
             //gameState.Controller = tryLoadNNController("MMPac", NNValues);
 
-            Console.WriteLine("Choose an AI agent to control Pacman:");
-            Console.WriteLine(" 1 - LucPacScripted");
-            Console.WriteLine(" 2 - LucPac (MCTS)");
-            Console.WriteLine(" 3 - MMLocPac (Evolved Neural Network) from .nn file");
-            Console.WriteLine(" 5 - SimRandom");
-            Console.WriteLine(" 6 - UncertainAgent");
-            Console.WriteLine(" 7 - LucPacMCTS2");
+            this.AgentFile = AgentFile;
 
-            Selection = int.Parse(Console.ReadKey().KeyChar.ToString());
+            if (Agent == "")
+            {
+
+                Console.WriteLine("Choose an AI agent to control Pacman:");
+                Console.WriteLine(" 1 - LucPacScripted");
+                Console.WriteLine(" 2 - LucPac (MCTS)");
+                Console.WriteLine(" 3 - MMLocPac (Evolved Neural Network) from .nn file");
+                Console.WriteLine(" 5 - SimRandom");
+                Console.WriteLine(" 6 - UncertainAgent");
+                Console.WriteLine(" 7 - LucPacMCTS2");
+
+                Selection = int.Parse(Console.ReadKey().KeyChar.ToString());
+
+            } else
+            {
+                Selection = int.Parse(Agent);
+            }
 
             gameState.Controller = GetResetController();
 

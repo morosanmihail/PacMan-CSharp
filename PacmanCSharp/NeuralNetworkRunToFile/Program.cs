@@ -17,10 +17,16 @@ namespace NeuralNetworkRunToFile
         public static string SaveFolder = "";
         static void Main(string[] args)
         {
-            if (args.Length > 1)
+            if (args.Length > 0)
             {
                 RunFolder = args[0];
-                SaveFolder = args[1];
+                if (args.Length > 1)
+                {
+                    SaveFolder = args[1];
+                } else
+                {
+                    SaveFolder = RunFolder;
+                }
             }
             else
             {
@@ -30,7 +36,7 @@ namespace NeuralNetworkRunToFile
             }
 
             var files = Directory.GetFiles(RunFolder);
-            var latestfile = files.OrderBy(s => s).Last();
+            var latestfile = files.OrderBy(s => s).Last(s => s.EndsWith("xml"));
 
             var doc = new XmlDocument();
             doc.Load(latestfile);
