@@ -21,18 +21,56 @@ namespace PacmanServer
     class Program
     {
         public static string HostName = "";
+        public static int Port = 5672;
+        public static string Username = "guest";
+        public static string Password = "guest";
+
+        public static bool UseAMQP = false;
+        public static string AMQPURL = "";
 
         public static void LoadParameters(string[] args)
         {
             if (args.Length > 0)
             {
-                HostName = args[0];
+                UseAMQP = args[0].Equals("y");
+
+                if (UseAMQP)
+                {
+                    AMQPURL = args[1];
+                }
+                else
+                {
+                    HostName = args[1];
+
+                    if (args.Length > 2)
+                    {
+                        Username = args[2];
+                        Password = args[3];
+                    }
+                }
             }
             else
             {
-                Console.Write("Host Name: ");
+                Console.Write("Use AMQP? (y/n)");
+                UseAMQP = Console.ReadKey().KeyChar == 'y';
+                Console.WriteLine();
 
-                HostName = Console.ReadLine();
+                if (UseAMQP)
+                {
+                    Console.Write("AMQP URL: ");
+                    AMQPURL = Console.ReadLine();
+                }
+                else
+                {
+                    Console.Write("Host Name: ");
+                    HostName = Console.ReadLine();
+
+                    Console.Write("User Name: ");
+                    Username = Console.ReadLine();
+
+                    Console.Write("Password: ");
+                    Password = Console.ReadLine();
+                }
             }
         }
 
@@ -212,6 +250,12 @@ namespace PacmanServer
                         gs.Controller = controller;
 
                         lastGamesPlayed = gamesPlayed;
+                    } else
+                    {
+                        if(ms - lastMs > 3600000)
+                        {
+                            gs.InvokeGameOver();
+                        }
                     }
                 }
                 watch.Stop();
@@ -276,10 +320,23 @@ namespace PacmanServer
         {
             LoadParameters(args);
 
-            var factory = new ConnectionFactory()
+            ConnectionFactory factory = null;
+            if (UseAMQP)
             {
-                HostName = HostName
-            };
+                factory = new ConnectionFactory()
+                {
+                    Uri = AMQPURL,
+                };
+            } else
+            {
+                factory = new ConnectionFactory()
+                {
+                    HostName = HostName,
+                    UserName = Username,
+                    Password = Password,
+
+                };
+            }
 
             do
             {
