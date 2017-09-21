@@ -7,11 +7,52 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace MMPac
 {
+    [DataContract]
+    public class SaveLocPacToFile
+    {
+        MMLocPac Agent;
+
+        byte[] NetworkSerializeValue;
+        List<int> _astarweights;
+
+        [DataMember]
+        public byte[] NetworkSerialize
+        {
+            get
+            {
+                return Accord.IO.Serializer.Save(Agent.Network);
+            }
+            set
+            {
+                NetworkSerializeValue = value;
+            }
+        }
+
+        [DataMember]
+        public List<int> AStarWeights
+        {
+            get
+            {
+                return (Agent != null) ? Agent.AStarWeights : null;
+            }
+            set
+            {
+                _astarweights = value;
+            }
+        }
+
+        public SaveLocPacToFile(MMLocPac NN)
+        {
+            this.Agent = NN;
+        }
+    }
+
     public class MMLocPac : BasePacman
     {
         public DeepBeliefNetwork Network;
@@ -20,6 +61,7 @@ namespace MMPac
         static int OutputCount = 1;
 
         EvolutionWeights EvoWeights;
+        public List<int> AStarWeights = new List<int>() { 10, 5, 2, 2000, 1 };
 
         int ThinkTicker = 0;
         Direction LastThink = Direction.None;
@@ -29,7 +71,7 @@ namespace MMPac
 
         //List<double> PreviousOutput = new List<double>();
 
-        public MMLocPac(List<double> NNWeights)
+        public MMLocPac(List<double> NNWeights, List<int> AStarWeights = null)
             : base("MMLocPac")
         {
             Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, 10, OutputCount);
@@ -38,12 +80,19 @@ namespace MMPac
             EvoWeights.SetWeights(NNWeights);
             Network.UpdateVisibleWeights();
 
+            if (AStarWeights != null)
+            {
+                this.AStarWeights = AStarWeights;
+            }
+
             //for (int i = 0; i < OutputCount; i++) PreviousOutput.Add(0);
         }
 
         public MMLocPac(string LoadFromFile = "")
             : base("MMLocPac")
         {
+            //TODO: change this to load from SaveLocPacToFile
+
             if (LoadFromFile.Length > 0)
             {
                 EvoWeights = new EvolutionWeights(null);
@@ -53,8 +102,6 @@ namespace MMPac
             {
                 Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, 10, OutputCount);
             }
-
-            //for (int i = 0; i < OutputCount; i++) PreviousOutput.Add(0);
         }
 
         public void SaveWeights(string filename)
@@ -83,11 +130,11 @@ namespace MMPac
                 input.Add((!G.Chasing && G.Entered) ? 1 : -1);
 
                 //input.Add(Normalize(PacX - G.Node.X, 32)); input.Add(Normalize(PacY - G.Node.Y, 32));
-                
+
                 //Distance to ghost
                 //input.Add(Normalize(Math.Abs(PacX - G.Node.X) + Math.Abs(PacY - G.Node.Y), 64));
             }
-            
+
             var NearestPowerPill = StateInfo.NearestPowerPill(P, gs);
             if (NearestPowerPill.Target != null)
             {
@@ -103,10 +150,11 @@ namespace MMPac
                 //input.Add(1);
             }
 
-            if(P.Type == Node.NodeType.Pill)
+            if (P.Type == Node.NodeType.Pill)
             {
                 input.Add(0);
-            } else
+            }
+            else
             {
                 NearestPowerPill = StateInfo.NearestPill(P, gs);
                 if (NearestPowerPill.Target != null)
@@ -192,7 +240,8 @@ namespace MMPac
                 LastThink = Res;
 
                 return Res;
-            } else
+            }
+            else
             {
                 ThinkTicker++;
 
@@ -207,10 +256,16 @@ namespace MMPac
 
         public Node AStarGetBestRoute(GameState gs, Node startingPoint, Node to)
         {
+            int DefaultValue = AStarWeights[0]; //10
+            int PillValue = AStarWeights[1]; //5
+            int PowerPillValue = AStarWeights[2]; //2
+            int ChasingGhostValue = AStarWeights[3]; //2000
+            int FleeingGhostValue = AStarWeights[4]; //1
 
-            Dictionary<Node,float> priorityQueue = new Dictionary<Node, float>();
 
-            priorityQueue.Add(startingPoint,0);
+            Dictionary<Node, float> priorityQueue = new Dictionary<Node, float>();
+
+            priorityQueue.Add(startingPoint, 0);
 
             Dictionary<Node, Node> came_from = new Dictionary<Node, Node>();
             Dictionary<Node, float> cost_so_far = new Dictionary<Node, float>();
@@ -220,7 +275,7 @@ namespace MMPac
 
             Node current = null;
 
-            while(!(priorityQueue.Count == 0))
+            while (!(priorityQueue.Count == 0))
             {
                 var min = priorityQueue.Min(p => p.Value);
                 current = priorityQueue.Where(p => p.Value == min).First().Key;
@@ -231,25 +286,29 @@ namespace MMPac
                     break;
                 }
 
-                foreach(var neighbour in current.PossibleDirections)
+                foreach (var neighbour in current.PossibleDirections)
                 {
-                    float pass_cost = 10;
-                    if(neighbour.Type == Node.NodeType.Pill)
+                    float pass_cost = DefaultValue;
+                    if (neighbour.Type == Node.NodeType.Pill)
                     {
-                        pass_cost = 5;
+                        pass_cost = PillValue;
+                    }
+                    if (neighbour.Type == Node.NodeType.PowerPill)
+                    {
+                        pass_cost = PowerPillValue;
                     }
 
-                    foreach(var g in gs.Ghosts)
+                    foreach (var g in gs.Ghosts)
                     {
                         var Path = g.Node.ShortestPath[neighbour.X, neighbour.Y];
                         if (Path != null && Path.Distance < 2)
                         {
-                            pass_cost = (g.Fleeing ? 1 : 2000);
+                            pass_cost = (g.Fleeing ? FleeingGhostValue : ChasingGhostValue);
                         }
                     }
                     float new_cost = cost_so_far[current] + pass_cost;
 
-                    if((!cost_so_far.ContainsKey(neighbour)) || (new_cost < cost_so_far[neighbour]))
+                    if ((!cost_so_far.ContainsKey(neighbour)) || (new_cost < cost_so_far[neighbour]))
                     {
                         cost_so_far[neighbour] = new_cost;
 
@@ -278,7 +337,7 @@ namespace MMPac
                 {
                     PathToTake.Add(path);
 
-                    if(came_from[path] == startingPoint)
+                    if (came_from[path] == startingPoint)
                     {
                         return path;
                     }
@@ -300,7 +359,7 @@ namespace MMPac
                                new Point(start.CenterX, start.CenterY),
                                new Point(end.CenterX, end.CenterY));
 
-            if(bestNode != null)
+            if (bestNode != null)
             {
                 g.DrawLine(new Pen(Color.Green, 5f),
                                new Point(start.CenterX, start.CenterY),
