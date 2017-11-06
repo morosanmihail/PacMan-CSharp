@@ -82,6 +82,7 @@
     <Compile Include="LucPac.cs" />
     <Compile Include="LucPacMCTS.cs" />
     <Compile Include="LucPacScripted.cs" />
+    <Compile Include="MMLocPacMemory.cs" />
     <Compile Include="MMMCTS.cs" />
     <Compile Include="MMLocPac.cs" />
     <Compile Include="MMPac.cs" />

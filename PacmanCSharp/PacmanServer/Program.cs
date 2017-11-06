@@ -139,6 +139,11 @@ namespace PacmanServer
                         return new MMPac.MMLocPac("NeuralNetworkLocPac.nn");
                     else
                         return new MMPac.MMLocPac(CustomData.MapData.EvolvedValues);
+                case "MMLocPacMemory":
+                    if (CustomData.MapData.EvolvedValues.Count < 25)
+                        return new MMPac.MMLocPacMemory("NeuralNetworkLocPac.nn");
+                    else
+                        return new MMPac.MMLocPacMemory(CustomData.MapData.EvolvedValues);
                 case "LucPac":
                     LucPac.REMAIN_QUIET = true;
                     return new LucPac();
