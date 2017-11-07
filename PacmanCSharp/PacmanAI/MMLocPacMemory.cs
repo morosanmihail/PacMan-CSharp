@@ -57,7 +57,7 @@ namespace MMPac
     {
         public DeepBeliefNetwork Network;
 
-        static int InputCount = 36;
+        static int InputCount = 24;
         static int OutputCount = 1;
         static int HiddenCount = 12;
 
@@ -77,7 +77,7 @@ namespace MMPac
 
         //List<double> PreviousOutput = new List<double>();
 
-        public MMLocPacMemory(List<double> NNWeights, List<int> AStarWeights = null)
+        public MMLocPacMemory(List<double> NNWeights, List<double> AStarWeights = null)
             : base("MMLocPacMemory")
         {
             Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, HiddenCount, OutputCount);
@@ -88,7 +88,11 @@ namespace MMPac
 
             if (AStarWeights != null)
             {
-                this.AStarWeights = AStarWeights;
+                this.AStarWeights = new List<int>();
+                foreach(var W in AStarWeights)
+                {
+                    this.AStarWeights.Add((int)W);
+                }
             }
 
             //for (int i = 0; i < OutputCount; i++) PreviousOutput.Add(0);
@@ -191,7 +195,7 @@ namespace MMPac
             var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min(50, InputsOverTime[P.X, P.Y].Count-1)];
 
             input.AddRange(NearPastInputs);
-            input.AddRange(FarPastInputs);
+            //input.AddRange(FarPastInputs);
 
             return input;
         }

@@ -125,7 +125,7 @@ namespace PacmanServer
             GhostsEaten = new List<int>();
         }
 
-        static BasePacman GetNewController(RPCData CustomData)
+        static BasePacman GetNewController(GameData CustomData)
         {
             switch (CustomData.AIToUse)
             {
@@ -133,17 +133,17 @@ namespace PacmanServer
                     LucPacScripted.REMAIN_QUIET = true;
                     return new LucPacScripted();
                 case "MMPac":
-                    return new MMPac.MMPac(CustomData.MapData.EvolvedValues);
+                    return new MMPac.MMPac(CustomData.EvolvedValues);
                 case "MMLocPac":
-                    if (CustomData.MapData.EvolvedValues.Count < 25)
-                        return new MMPac.MMLocPac("NeuralNetworkLocPac.nn");
-                    else
-                        return new MMPac.MMLocPac(CustomData.MapData.EvolvedValues);
+                    //if (CustomData.EvolvedValues.Count < 25)
+                    //    return new MMPac.MMLocPac("NeuralNetworkLocPac.nn");
+                    //else
+                        return new MMPac.MMLocPac(CustomData.EvolvedNeuralNet);
                 case "MMLocPacMemory":
-                    if (CustomData.MapData.EvolvedValues.Count < 25)
-                        return new MMPac.MMLocPacMemory("NeuralNetworkLocPac.nn");
-                    else
-                        return new MMPac.MMLocPacMemory(CustomData.MapData.EvolvedValues);
+                    //if (CustomData.EvolvedValues.Count < 25)
+                    //    return new MMPac.MMLocPacMemory("NeuralNetworkLocPac.nn");
+                    //else
+                        return new MMPac.MMLocPacMemory(CustomData.EvolvedNeuralNet, CustomData.EvolvedAStarValues);
                 case "LucPac":
                     LucPac.REMAIN_QUIET = true;
                     return new LucPac();
@@ -152,7 +152,7 @@ namespace PacmanServer
             }
         }
 
-        public static void RunGameLinear(RPCData CustomData)
+        public static void RunGameLinear(GameData CustomData)
         {
             Reset();
             try
@@ -166,9 +166,9 @@ namespace PacmanServer
                 
                 BasePacman controller = null;
 
-                if(CustomData.MapData.EvolvedValues.Count < 25 && CustomData.MapData.EvolvedValues.Count > 0)
+                if(CustomData.EvolvedValues.Count < 25 && CustomData.EvolvedValues.Count > 0)
                 {
-                    gs = new GameState(CustomData.MapData.EvolvedValues, CustomData.RandomSeed);
+                    gs = new GameState(CustomData.EvolvedValues, CustomData.RandomSeed);
                 } else
                 {
                     gs = new GameState(CustomData.RandomSeed);
@@ -393,7 +393,8 @@ namespace PacmanServer
                                 var Base = new double[9] { 3.0, 2.8, 2.8, 2.8, 2.8, 1.5, 1.5, 1.5, 1.5 };
                                 List<double> Params = new List<double>(Base);
 
-                                RPCData customData = new RPCData();
+                                //RPCData customData = new RPCData();
+                                GameData customData = new GameData();
                                 customData.AIToUse = JResults.custom.AIAgent;
                                 customData.GamesToPlay = JResults.custom.NumberOfGames;
                                 
@@ -403,17 +404,24 @@ namespace PacmanServer
                                     {
                                         if (((string)Param.name).Equals("neuralnet"))
                                         {
-                                            Params = new List<double>(Param.value.ToObject<List<double>>());
-                                            break;
+                                            customData.EvolvedNeuralNet = new List<double>(Param.value.ToObject<List<double>>());
+                                            //break;
                                         }
                                         else
                                         {
-                                            Params[(int)Param.custom.index] += (double)Param.value;
+                                            if (((string)Param.name).Equals("astar"))
+                                            {
+                                                customData.EvolvedAStarValues = new List<double>(Param.value.ToObject<List<double>>());
+                                            }
+                                            else
+                                            {
+                                                Params[(int)Param.custom.index] += (double)Param.value;
+                                            }
                                         }
                                     }
                                 }
                                 
-                                customData.MapData = new MapData(Params);
+                                customData.EvolvedValues = Params;
 
                                 customData.RandomSeed = (int)JResults.randomseed;
 
@@ -485,5 +493,15 @@ namespace PacmanServer
 
             Scores.Add(gs.Pacman.Score);
         }
+    }
+
+    public class GameData
+    {
+        public int GamesToPlay;
+        public string AIToUse;
+        public int RandomSeed;
+        public List<double> EvolvedValues;
+        public List<double> EvolvedAStarValues;
+        public List<double> EvolvedNeuralNet;
     }
 }
