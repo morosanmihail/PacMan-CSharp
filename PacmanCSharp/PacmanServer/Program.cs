@@ -143,7 +143,7 @@ namespace PacmanServer
                     //if (CustomData.EvolvedValues.Count < 25)
                     //    return new MMPac.MMLocPacMemory("NeuralNetworkLocPac.nn");
                     //else
-                        return new MMPac.MMLocPacMemory(CustomData.EvolvedNeuralNet, CustomData.EvolvedAStarValues);
+                        return new MMPac.MMLocPacMemory(CustomData.EvolvedNeuralNet, CustomData.EvolvedAStarValues, CustomData.NNInput, CustomData.NNHidden, CustomData.NNOutput);
                 case "LucPac":
                     LucPac.REMAIN_QUIET = true;
                     return new LucPac();
@@ -420,7 +420,11 @@ namespace PacmanServer
                                         }
                                     }
                                 }
-                                
+
+                                customData.NNInput = JResults.custom.NNInput;
+                                customData.NNHidden = JResults.custom.NNHidden;
+                                customData.NNOutput = JResults.custom.NNOutput;
+
                                 customData.EvolvedValues = Params;
 
                                 customData.RandomSeed = (int)JResults.randomseed;
@@ -503,5 +507,6 @@ namespace PacmanServer
         public List<double> EvolvedValues;
         public List<double> EvolvedAStarValues;
         public List<double> EvolvedNeuralNet;
+        public int NNInput, NNHidden, NNOutput;
     }
 }

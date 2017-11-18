@@ -23,6 +23,7 @@ namespace MMPac
         public void SetWeights(List<double> NNWeights)
         {
             int Current = 0;
+            
             foreach (ActivationLayer layer in network.Layers)
             {
                 foreach (ActivationNeuron neuron in layer.Neurons)
@@ -30,8 +31,11 @@ namespace MMPac
                     for (int i = 0; i < neuron.Weights.Length; i++)
                     {
                         neuron.Weights[i] = NNWeights[Current];
+                        
                         Current++;
                     }
+                    neuron.Threshold = NNWeights[Current];
+                    Current++;
                 }
             }
             

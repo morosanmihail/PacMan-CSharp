@@ -57,9 +57,9 @@ namespace MMPac
     {
         public DeepBeliefNetwork Network;
 
-        static int InputCount = 24;
-        static int OutputCount = 1;
-        static int HiddenCount = 12;
+        int InputCount = 24;
+        int OutputCount = 1;
+        int HiddenCount = 12;
 
         EvolutionWeights EvoWeights;
         public List<int> AStarWeights = new List<int>() { 10, 5, 2, 2000, 1 };
@@ -72,14 +72,19 @@ namespace MMPac
 
         List<List<double>>[,] InputsOverTime = new List<List<double>>[28,31];
         double FirstTime = -1;
-        double MaxTime = 3000;
+        double MaxTime = 2000;
+        double NearPastTime = 1000;
         double Now = -1;
 
         //List<double> PreviousOutput = new List<double>();
 
-        public MMLocPacMemory(List<double> NNWeights, List<double> AStarWeights = null)
+        public MMLocPacMemory(List<double> NNWeights, List<double> AStarWeights = null, int InputC = 0, int HiddenC = 0, int OutputC = 0)
             : base("MMLocPacMemory")
         {
+            InputCount = InputC == 0 ? 24 : InputC;
+            HiddenCount = HiddenC == 0 ? 1 : HiddenC;
+            OutputCount = OutputC == 0 ? 12 : OutputC;
+
             Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, HiddenCount, OutputCount);
 
             EvoWeights = new EvolutionWeights(Network);
@@ -98,7 +103,7 @@ namespace MMPac
             //for (int i = 0; i < OutputCount; i++) PreviousOutput.Add(0);
         }
 
-        public MMLocPacMemory(string LoadFromFile = "")
+        /*public MMLocPacMemory(string LoadFromFile = "")
             : base("MMLocPacMemory")
         {
             //TODO: change this to load from SaveLocPacToFile
@@ -112,7 +117,7 @@ namespace MMPac
             {
                 Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, HiddenCount, OutputCount);
             }
-        }
+        }*/
 
         public void SaveWeights(string filename)
         {
@@ -192,10 +197,13 @@ namespace MMPac
             InputsOverTime[P.X,P.Y].Add(new List<double>(input));
             
             var FarPastInputs = InputsOverTime[P.X, P.Y][0];
-            var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min(50, InputsOverTime[P.X, P.Y].Count-1)];
+            //var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min(50, InputsOverTime[P.X, P.Y].Count-1)];
+            var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min((int)((MaxTime - NearPastTime) / GameState.MSPF), InputsOverTime[P.X,P.Y].Count - 1)];
 
-            input.AddRange(NearPastInputs);
-            //input.AddRange(FarPastInputs);
+            if(InputCount >= 24)
+                input.AddRange(NearPastInputs);
+            if(InputCount >= 36)
+                input.AddRange(FarPastInputs);
 
             return input;
         }
