@@ -14,8 +14,8 @@ namespace MMPac
 {
     public class EvolutionWeights
     {
-        private DeepBeliefNetwork network;
-        public EvolutionWeights(DeepBeliefNetwork network)
+        private ActivationNetwork network;
+        public EvolutionWeights(ActivationNetwork network)
         {
             this.network = network;
         }
@@ -44,21 +44,21 @@ namespace MMPac
         public void SetWeightsRandom()
         {
             new GaussianWeights(network).Randomize();
-            ((DeepBeliefNetwork)network).UpdateVisibleWeights();
+            //((ActivationNetwork)network).UpdateVisibleWeights();
         }
 
         public List<double> TeachNetwork(List<double> Input, List<double> Output)
         {
-            /*var teacher = new BackPropagationLearning(network)
+            var teacher = new BackPropagationLearning(network)
             {
                 LearningRate = 0.1f,
                 Momentum = 0.9f
-            };*/
-            var teacher = new Accord.Neuro.Learning.DeepNeuralNetworkLearning(network)
+            };
+            /*var teacher = new Accord.Neuro.Learning.DeepNeuralNetworkLearning(network)
             {
                 Algorithm = (ann, i) => new ParallelResilientBackpropagationLearning(ann),
                 LayerIndex = network.Layers.Length - 1,
-            };
+            };*/
 
             //double[][] inputs, outputs;
             //Main.Database.Training.GetInstances(out inputs, out outputs);
@@ -70,23 +70,23 @@ namespace MMPac
                 //double error = teacher.RunEpoch(inputs, outputs);
             }
 
-            network.UpdateVisibleWeights();
+            //network.UpdateVisibleWeights();
 
             return new List<double>(network.Compute(Input.ToArray()));
         }
 
         public void TeachNetworkByEpochs(List<List<double>> Input, List<int> Output, int Epochs)
         {
-            /*var teacher = new BackPropagationLearning(network)
+            var teacher = new BackPropagationLearning(network)
             {
                 LearningRate = 0.1f,
                 Momentum = 0.9f
-            };*/
-            var teacher = new Accord.Neuro.Learning.DeepNeuralNetworkLearning(network)
+            };
+            /*var teacher = new Accord.Neuro.Learning.DeepNeuralNetworkLearning(network)
             {
                 Algorithm = (ann, i) => new ParallelResilientBackpropagationLearning(ann),
                 LayerIndex = network.Layers.Length - 1,
-            };
+            };*/
 
             double[][] inputs, outputs;
             //Main.Database.Training.GetInstances(out inputs, out outputs);
@@ -108,7 +108,7 @@ namespace MMPac
                 double error = teacher.RunEpoch(inputs, outputs);
             }
 
-            network.UpdateVisibleWeights();
+            //network.UpdateVisibleWeights();
 
         }
 
@@ -117,16 +117,16 @@ namespace MMPac
             network.Save(filename);
         }
 
-        public DeepBeliefNetwork LoadWeightsFromFile(string filename)
+        public ActivationNetwork LoadWeightsFromFile(string filename)
         {
-            network = DeepBeliefNetwork.Load(filename);
+            network = (ActivationNetwork)Network.Load(filename);
             return network;
         }
     }
 
     public class MMPac : BasePacman
     {
-        public DeepBeliefNetwork Network;
+        public ActivationNetwork Network;
 
         static int InputCount = 12;
         static int OutputCount = 1;
@@ -138,11 +138,11 @@ namespace MMPac
         public MMPac(List<double> NNWeights)
             : base("MMPac")
         {
-            Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, 5, 5, OutputCount);
+            Network = new ActivationNetwork(new BernoulliFunction(), InputCount, 5, 5, OutputCount);
 
             EvoWeights = new EvolutionWeights(Network);
             EvoWeights.SetWeights(NNWeights);
-            Network.UpdateVisibleWeights();
+            //Network.UpdateVisibleWeights();
 
             //for (int i = 0; i < OutputCount; i++) PreviousOutput.Add(0);
         }

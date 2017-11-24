@@ -55,7 +55,7 @@ namespace MMPac
 
     public class MMLocPac : BasePacman
     {
-        public DeepBeliefNetwork Network;
+        public ActivationNetwork Network;
 
         static int InputCount = 12;
         static int OutputCount = 1;
@@ -74,11 +74,11 @@ namespace MMPac
         public MMLocPac(List<double> NNWeights, List<int> AStarWeights = null)
             : base("MMLocPac")
         {
-            Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, 10, OutputCount);
+            Network = new ActivationNetwork(new BernoulliFunction(), InputCount, 10, OutputCount);
 
             EvoWeights = new EvolutionWeights(Network);
             EvoWeights.SetWeights(NNWeights);
-            Network.UpdateVisibleWeights();
+            //Network.UpdateVisibleWeights();
 
             if (AStarWeights != null)
             {
@@ -96,7 +96,7 @@ namespace MMPac
             if (LoadFromFile.Length > 0)
             {
                 EvoWeights = new EvolutionWeights(null);
-                Network = EvoWeights.LoadWeightsFromFile(LoadFromFile);
+                Network = (ActivationNetwork)EvoWeights.LoadWeightsFromFile(LoadFromFile);
             }
             else
             {

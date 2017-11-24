@@ -143,7 +143,7 @@ namespace PacmanServer
                     //if (CustomData.EvolvedValues.Count < 25)
                     //    return new MMPac.MMLocPacMemory("NeuralNetworkLocPac.nn");
                     //else
-                        return new MMPac.MMLocPacMemory(CustomData.EvolvedNeuralNet, CustomData.EvolvedAStarValues, CustomData.NNInput, CustomData.NNHidden, CustomData.NNOutput);
+                        return new MMPac.MMLocPacMemory(CustomData.EvolvedNeuralNet, CustomData.EvolvedAStarValues, CustomData.NNInput, CustomData.NNHidden, CustomData.NNOutput, CustomData.NearNodesOnly);
                 case "LucPac":
                     LucPac.REMAIN_QUIET = true;
                     return new LucPac();
@@ -397,6 +397,7 @@ namespace PacmanServer
                                 GameData customData = new GameData();
                                 customData.AIToUse = JResults.custom.AIAgent;
                                 customData.GamesToPlay = JResults.custom.NumberOfGames;
+                                customData.NearNodesOnly = JResults.custom.NearNodesOnly != null ? JResults.custom.NearNodesOnly : false;
                                 
                                 foreach (var Param in JResults.parameters)
                                 {
@@ -508,5 +509,6 @@ namespace PacmanServer
         public List<double> EvolvedAStarValues;
         public List<double> EvolvedNeuralNet;
         public int NNInput, NNHidden, NNOutput;
+        public bool NearNodesOnly;
     }
 }

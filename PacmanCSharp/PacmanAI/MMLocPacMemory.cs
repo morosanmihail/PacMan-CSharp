@@ -55,7 +55,7 @@ namespace MMPac
 
     public class MMLocPacMemory : BasePacman
     {
-        public DeepBeliefNetwork Network;
+        public ActivationNetwork Network;
 
         int InputCount = 24;
         int OutputCount = 1;
@@ -75,21 +75,25 @@ namespace MMPac
         double MaxTime = 2000;
         double NearPastTime = 1000;
         double Now = -1;
+        bool NearNodesOnly = false;
+        private double sigmoidAlphaValue = 2.0;
 
         //List<double> PreviousOutput = new List<double>();
 
-        public MMLocPacMemory(List<double> NNWeights, List<double> AStarWeights = null, int InputC = 0, int HiddenC = 0, int OutputC = 0)
+        public MMLocPacMemory(List<double> NNWeights, List<double> AStarWeights = null, int InputC = 0, int HiddenC = 0, int OutputC = 0, bool NearNodesOnly = false)
             : base("MMLocPacMemory")
         {
             InputCount = InputC == 0 ? 24 : InputC;
             HiddenCount = HiddenC == 0 ? 1 : HiddenC;
             OutputCount = OutputC == 0 ? 12 : OutputC;
 
-            Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, HiddenCount, OutputCount);
+            this.NearNodesOnly = NearNodesOnly;
+
+            Network = new ActivationNetwork(new BipolarSigmoidFunction(sigmoidAlphaValue), InputCount, HiddenCount, OutputCount);
 
             EvoWeights = new EvolutionWeights(Network);
             EvoWeights.SetWeights(NNWeights);
-            Network.UpdateVisibleWeights();
+            //Network.UpdateVisibleWeights();
 
             if (AStarWeights != null)
             {
@@ -135,7 +139,10 @@ namespace MMPac
             input.Add((PathtoPac != null ? (double)PathtoPac.Distance / 100 : 1));
 
             //IsJunction
-            input.Add(P.PossibleDirections.Count > 2 ? 1 : -1);
+            if (InputCount % 12 == 0)
+            {
+                input.Add(P.PossibleDirections.Count > 2 ? 1 : -1);
+            }
 
             foreach (var G in gs.Ghosts)
             {
@@ -200,9 +207,9 @@ namespace MMPac
             //var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min(50, InputsOverTime[P.X, P.Y].Count-1)];
             var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min((int)((MaxTime - NearPastTime) / GameState.MSPF), InputsOverTime[P.X,P.Y].Count - 1)];
 
-            if(InputCount >= 24)
+            if(InputCount >= 22)
                 input.AddRange(NearPastInputs);
-            if(InputCount >= 36)
+            if(InputCount >= 33)
                 input.AddRange(FarPastInputs);
 
             return input;
@@ -223,9 +230,29 @@ namespace MMPac
                 double bestScore = -10000;
                 //double[][] Scores = new double[gs.Map.Nodes.GetLength(0)][];
 
-                //List<Direction> possible = gs.Pacman.PossibleDirections();
+                List<Node> NodesToCheck = new List<Node>();
 
-                foreach (var Node in gs.Map.Nodes)
+                List<Node> neighbourNodes = new List<Node>();
+                List<Direction> possible = gs.Pacman.PossibleDirections();
+                foreach(var Dir in possible)
+                {
+                    neighbourNodes.Add(gs.Pacman.Node.GetNeighbour(Dir));
+                }
+
+                if(NearNodesOnly)
+                {
+                    NodesToCheck = neighbourNodes;
+                } else
+                {
+                    /*foreach(var N in gs.Map.Nodes)
+                    {
+                        NodesToCheck.Add(N);
+                    }*/
+                    NodesToCheck = gs.Map.PillNodes;
+                }
+
+                foreach(var Node in NodesToCheck)
+                //foreach (var Node in gs.Map.Nodes)
                 //foreach(var Dir in possible)
                 {
                     if (Node != gs.Pacman.Node && Node.ShortestPath[gs.Pacman.Node.X, gs.Pacman.Node.Y] != null)
