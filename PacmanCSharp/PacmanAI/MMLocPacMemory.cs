@@ -207,12 +207,26 @@ namespace MMPac
             //var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min(50, InputsOverTime[P.X, P.Y].Count-1)];
             var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min((int)((MaxTime - NearPastTime) / GameState.MSPF), InputsOverTime[P.X,P.Y].Count - 1)];
 
-            if(InputCount >= 22)
-                input.AddRange(NearPastInputs);
-            if(InputCount >= 33)
-                input.AddRange(FarPastInputs);
+            if (InputCount >= 22)
+            {
+                input.AddRange(GenerateDifferenceOfInputs(input, NearPastInputs));
+            }
+            if (InputCount >= 33)
+            {
+                input.AddRange(GenerateDifferenceOfInputs(input, FarPastInputs));
+            }
 
             return input;
+        }
+
+        public List<double> GenerateDifferenceOfInputs(List<double> Original, List<double> New)
+        {
+            var Res = new List<double>();
+            for(int i=0;i<Original.Count;i++)
+            {
+                Res.Add((New[i] - Original[i]) * 0.5);
+            }
+            return Res;
         }
 
         public override Direction Think(GameState gs)
