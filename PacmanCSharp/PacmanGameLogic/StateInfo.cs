@@ -102,7 +102,8 @@ namespace Pacman.GameLogic
             Node bestNode = null;
             Node.PathInfo bestPath = null;
             
-            foreach (Node node in gs.Map.PillNodes)
+            
+            foreach (Node node in gs.Map.PowerPillNodes)
             {
                 //if (node.Walkable)
                 //{

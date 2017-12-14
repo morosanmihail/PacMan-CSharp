@@ -28,6 +28,7 @@ namespace Pacman.GameLogic
 
 		private static Node[,] BackupNodes = new Node[Width,Height];
 		public List<Node> PillNodes = new List<Node>();
+        public List<Node> PowerPillNodes = new List<Node>();
 
 		public Node[,] Nodes = new Node[Width, Height];
 
@@ -273,6 +274,7 @@ namespace Pacman.GameLogic
 						} else {
 							Nodes[x, y] = new Node(x, y, Node.NodeType.PowerPill);
 							PillNodes.Add(Nodes[x, y]);
+                            PowerPillNodes.Add(Nodes[x, y]);
 							PillsLeft++;
 						}
 					} else {
@@ -312,6 +314,8 @@ namespace Pacman.GameLogic
             Map _newmap = (Map)this.MemberwiseClone();
             _newmap.PillNodes = new List<Node>();
             _newmap.PillNodes.Clear();
+            _newmap.PowerPillNodes = new List<Node>();
+            _newmap.PowerPillNodes.Clear();
 
             _newmap.Nodes = new Node[Nodes.GetLength(0),
                                      Nodes.GetLength(1)]; 
@@ -329,6 +333,11 @@ namespace Pacman.GameLogic
                         // Add the node
                         _newmap.PillNodes.Add(_newmap.Nodes[x, y]);
 
+                    }
+
+                    if(_newmap.Nodes[x,y].Type == Node.NodeType.PowerPill)
+                    {
+                        _newmap.PowerPillNodes.Add(_newmap.Nodes[x, y]);
                     }
 
                     

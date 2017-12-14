@@ -80,6 +80,11 @@ namespace Pacman.Simulator
                         return new MMPac.MMLocPac("NeuralNetworkLocPac.nn");
                     else
                         return new MMPac.MMLocPac(AgentFile);
+                case 4:
+                    if (AgentFile == "")
+                        return new MMPac.MMLocPacMemory("NeuralNetworkLocPac.nn");
+                    else
+                        return new MMPac.MMLocPacMemory(AgentFile);
                 case 6:
                     return new UncertainAgent();
                 case 7:
@@ -126,6 +131,7 @@ namespace Pacman.Simulator
                 Console.WriteLine(" 1 - LucPacScripted");
                 Console.WriteLine(" 2 - LucPac (MCTS)");
                 Console.WriteLine(" 3 - MMLocPac (Evolved Neural Network) from .nn file");
+                Console.WriteLine(" 4 - MMLocPacMemory (Evolved Neural Network) from .nn file");
                 Console.WriteLine(" 5 - SimRandom");
                 Console.WriteLine(" 6 - UncertainAgent");
                 Console.WriteLine(" 7 - LucPacMCTS2");

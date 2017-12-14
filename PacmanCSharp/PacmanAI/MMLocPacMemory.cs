@@ -78,6 +78,8 @@ namespace MMPac
         bool NearNodesOnly = false;
         private double sigmoidAlphaValue = 2.0;
 
+        //double MaxGhostDiff = 0.0000001;
+
         //List<double> PreviousOutput = new List<double>();
 
         public MMLocPacMemory(List<double> NNWeights, List<double> AStarWeights = null, int InputC = 0, int HiddenC = 0, int OutputC = 0, bool NearNodesOnly = false)
@@ -107,7 +109,7 @@ namespace MMPac
             //for (int i = 0; i < OutputCount; i++) PreviousOutput.Add(0);
         }
 
-        /*public MMLocPacMemory(string LoadFromFile = "")
+        public MMLocPacMemory(string LoadFromFile = "")
             : base("MMLocPacMemory")
         {
             //TODO: change this to load from SaveLocPacToFile
@@ -116,12 +118,14 @@ namespace MMPac
             {
                 EvoWeights = new EvolutionWeights(null);
                 Network = EvoWeights.LoadWeightsFromFile(LoadFromFile);
+
+                InputCount = Network.InputsCount;
             }
             else
             {
-                Network = new DeepBeliefNetwork(new BernoulliFunction(), InputCount, HiddenCount, OutputCount);
+                Network = new ActivationNetwork(new BipolarSigmoidFunction(sigmoidAlphaValue), InputCount, HiddenCount, OutputCount);
             }
-        }*/
+        }
 
         public void SaveWeights(string filename)
         {
@@ -139,7 +143,7 @@ namespace MMPac
             input.Add((PathtoPac != null ? (double)PathtoPac.Distance / 100 : 1));
 
             //IsJunction
-            if (InputCount % 12 == 0)
+            if (InputCount % 12 == 0 || InputCount == 16)
             {
                 input.Add(P.PossibleDirections.Count > 2 ? 1 : -1);
             }
@@ -147,7 +151,20 @@ namespace MMPac
             foreach (var G in gs.Ghosts)
             {
                 var Path = P.ShortestPath[G.Node.X, G.Node.Y];
-                input.Add((Path != null ? (double)Path.Distance / 100 : 1));
+                if(Path == null)
+                {
+                    if(P.X == G.Node.X && P.Y == G.Node.Y)
+                    {
+                        input.Add(0);
+                    } else
+                    {
+                        input.Add(P.ManhattanDistance(G.Node) / 100);
+                    }
+                } else
+                {
+                    input.Add((double)Path.Distance / 100);
+                }
+                //input.Add((Path != null ? (double)Path.Distance / 100 : P.ManhattanDistance(G.Node) / 100));
                 //input.Add(Path != null ? ((double)Path.Direction) : 1);
                 input.Add((!G.Chasing && G.Entered) ? 1 : -1);
 
@@ -207,13 +224,32 @@ namespace MMPac
             //var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min(50, InputsOverTime[P.X, P.Y].Count-1)];
             var NearPastInputs = InputsOverTime[P.X, P.Y][Math.Min((int)((MaxTime - NearPastTime) / GameState.MSPF), InputsOverTime[P.X,P.Y].Count - 1)];
 
+            if(InputCount == 16)
+            {
+                var diffed = GenerateDifferenceOfInputs(input, NearPastInputs);
+
+                //MaxGhostDiff = Math.Max(Math.Max(Math.Max(Math.Abs(diffed[2]), Math.Abs(diffed[4])), Math.Max(Math.Abs(diffed[6]), Math.Abs(diffed[8]))), MaxGhostDiff);
+
+                /*input.Add(diffed[2] > 0 ? 1 : diffed[2] < 0 ? -1 : 0);
+                input.Add(diffed[4] > 0 ? 1 : diffed[4] < 0 ? -1 : 0);
+                input.Add(diffed[6] > 0 ? 1 : diffed[6] < 0 ? -1 : 0);
+                input.Add(diffed[8] > 0 ? 1 : diffed[8] < 0 ? -1 : 0);*/
+
+                input.Add(diffed[2] / 0.2);
+                input.Add(diffed[4] / 0.2);
+                input.Add(diffed[6] / 0.2);
+                input.Add(diffed[8] / 0.2);
+            }
+
             if (InputCount >= 22)
             {
-                input.AddRange(GenerateDifferenceOfInputs(input, NearPastInputs));
+                var diffed = GenerateDifferenceOfInputs(input, NearPastInputs);
+                input.AddRange(diffed);
             }
             if (InputCount >= 33)
             {
-                input.AddRange(GenerateDifferenceOfInputs(input, FarPastInputs));
+                var diffed = GenerateDifferenceOfInputs(input, FarPastInputs);
+                input.AddRange(diffed);
             }
 
             return input;

@@ -1,4 +1,5 @@
 ﻿using MMPac;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -67,31 +68,37 @@ namespace NeuralNetworkRunToFile
             nsmgr.AddNamespace("df", "http://schemas.datacontract.org/2004/07/SharpGenetics.BaseClasses");
             nsmgr.AddNamespace("d4p1", "http://schemas.datacontract.org/2004/07/GeneticAlgorithm.GeneticAlgorithm");
             nsmgr.AddNamespace("d6p1", "http://schemas.microsoft.com/2003/10/Serialization/Arrays");
+            nsmgr.AddNamespace("z", "http://schemas.microsoft.com/2003/10/Serialization/");
 
             var Root = doc.DocumentElement;
             var Node = Root.SelectSingleNode(XPath, nsmgr);
 
+            string JSONPath = "//df:JsonParameters";
+            var JSONNode = Root.SelectSingleNode(JSONPath, nsmgr);
+            dynamic d = JObject.Parse(JSONNode.InnerText);
+
             //var Node = doc.DocumentElement.ChildNodes[2].ChildNodes[0].ChildNodes[9].ChildNodes[0].ChildNodes[7];
-            
+
             List<double> Weights = new List<double>();
-            int WeightCount = Node.ChildNodes.Count - 5;
+            int WeightCount = Node.ChildNodes.Count;// - 5;
 
             for(int i=0;i<WeightCount;i++)
             {
                 Weights.Add(double.Parse(Node.ChildNodes[i].InnerText));
             }
 
-            List<int> AStarWeights = new List<int>();
+            /*List<int> AStarWeights = new List<int>();
             for(int i=WeightCount;i<WeightCount + 5;i++)
             {
                 AStarWeights.Add(int.Parse(Node.ChildNodes[i].InnerText));
-            }
+            }*/
 
             //TODO change this to saving to other object type
 
-            var NN = new MMLocPac(Weights, AStarWeights);
+            var NN = new MMLocPacMemory(Weights, null, (int)d.custom.NNInput, (int)d.custom.NNHidden, (int)d.custom.NNOutput);
+            //var NN = new MMLocPac(Weights, AStarWeights);
 
-            SaveLocPacToFile sv = new SaveLocPacToFile(NN);
+            //SaveLocPacToFile sv = new SaveLocPacToFile(NN);
 
             //Save sv to file
 
