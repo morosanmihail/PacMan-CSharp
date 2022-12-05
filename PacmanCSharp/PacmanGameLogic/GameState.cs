@@ -525,7 +525,8 @@ namespace Pacman.GameLogic
 		public void InvokeGameOver(bool Simulated = false) {
             m_GameOverCount++;
 
-            GameOver?.Invoke(this, null);
+            if (GameOver != null) 
+	            GameOver(this, null);
             m_TotalRoundScore = 0;
             m_PillsEaten = 0;
             m_PowerPillsEaten = 0;

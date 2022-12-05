@@ -1,16 +1,9 @@
-﻿using System.Runtime.InteropServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.IO;
 using Pacman.GameLogic;
 using System.Diagnostics;
-using System.Threading;
-using System.Reflection;
-using System.Xml;
-using System.Runtime.Serialization;
-using Accord.Math;
+using System.IO;
 using Accord.Statistics;
 using PacmanGameLogic.Automation;
 using Accord.Statistics.Distributions.Univariate;
@@ -74,7 +67,7 @@ namespace PacmanAI
                                     Console.WriteLine("Number after the -c argument was not recognised.");
                                 }
                             }
-                        break;
+                            break;
 
                         // Called for when we want the agent to be quiet and no log output whatsoever.
                         case "-q":
@@ -203,13 +196,7 @@ namespace PacmanAI
 
             string TestAgent = "PacmanAI.UncertainAgent,PacmanAI";
 
-            var GRR = GR.RunGamesOnline(HostName,gamesToPlay, 
-                controller.GetType().Name
-                //TestAgent
-                , new Random().Next(), 
-                //null
-                new List<double>(Params)
-                );
+            var GRR = GR.RunGames(gamesToPlay, controller, gameParameters: Params.ToList());
 
             var NewScores = new List<double>();
             NewScores.AddRange(GRR.scores);
@@ -222,6 +209,8 @@ namespace PacmanAI
             {
                 ZeroScores.Add(0);
             }
+
+            WriteOutputFiles(GRR, controller);
 
             Console.WriteLine("Done - " + GRR.scores.Average() + " " + GRR.gamesPlayed);
             Console.WriteLine("Scores over 1600: " + GRR.scores.Where(s => s >= 1600).Count());
@@ -462,7 +451,48 @@ namespace PacmanAI
             Console.ReadLine();
 		}
 
-		private static void GameOverHandler(object sender, EventArgs args) {
+        private static string GetOutputFileName(string outputFileIdentifier, int sampleSize, BasePacman algorithm, DateTime generatedAt)
+        {
+	        Directory.CreateDirectory("output");
+			return string.Format("output/{0}_(size-{1})_{2}_{3:yyyy-MM-dd_hh-mm-ss}.csv",
+				outputFileIdentifier,
+				sampleSize,
+				algorithm.Name,
+				generatedAt);
+		}
+
+        private static void WriteOutputFiles(GameRunnerResults result, BasePacman controller)
+        {
+	        Console.WriteLine("Start writing output files");
+	        var generationTime = DateTime.Now;
+
+	        var aggregatedFileName = GetOutputFileName("aggregated", result.gamesPlayed, controller, generationTime);
+	        var aggregatedStatsStream = new StreamWriter(File.Open(aggregatedFileName, FileMode.Create));
+	        aggregatedStatsStream.WriteLine(
+		        "gamesPlayed,longestGame,highestScore,lowestScore,maxPillsEaten,minPillsEaten,avgPillsEaten,maxGhostsEaten,minGhostsEaten,avgGhostsEaten");
+	        aggregatedStatsStream.Write("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}",
+		        result.gamesPlayed,
+		        result.longestGame,
+		        result.highestScore,
+		        result.lowestScore,
+		        result.maxPillsEaten,
+		        result.minPillsEaten,
+		        result.avgPillsEaten,
+		        result.maxGhostsEaten,
+		        result.minGhostsEaten,
+		        result.avgGhostsEaten);
+	        aggregatedStatsStream.Close();
+
+	        var scoresFileName = GetOutputFileName("scores", result.gamesPlayed, controller, generationTime);
+	        var scoresStream = new StreamWriter(File.Open(scoresFileName, FileMode.Create));
+	        scoresStream.WriteLine("score");
+	        result.scores.ForEach(scoresStream.WriteLine);
+	        scoresStream.Close();
+
+	        Console.WriteLine("Finished writing output files");
+        }
+
+        private static void GameOverHandler(object sender, EventArgs args) {
 			if( ms - lastMs > longestGame )
 				longestGame = ms - lastMs;
 			if( gs.Pacman.Score > highestScore ) {
